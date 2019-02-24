@@ -5,7 +5,8 @@ temp/*
 !web.config
 app/config/config.local.neon
 vendor
-
+.idea
+.vscode
 
 # Created by https://www.gitignore.io/api/phpstorm,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=phpstorm,visualstudiocode

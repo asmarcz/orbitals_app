@@ -17,6 +17,7 @@ $configurator->createRobotLoader()
 $configurator->addConfig(__DIR__ . '/config/config.neon');
 $configurator->addConfig(__DIR__ . '/config/config.local.neon');
 $configurator->addConfig(__DIR__ . '/config/exceptions.neon');
+$configurator->addConfig(__DIR__ . '/config/elements.neon');
 
 $container = $configurator->createContainer();
 

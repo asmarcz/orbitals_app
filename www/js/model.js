@@ -1,3 +1,11 @@
+function aufbauOrder(first, second) {
+	let result = first.sum - second.sum;
+	if (result === 0) {
+		return first.n - second.n;
+	}
+	return result;
+}
+
 function mathModel(k, l) {
 	return l + k * (k - 1) / 2;
 }
@@ -67,13 +75,7 @@ class Controller {
 					this.createQuantumLayer();
 				}
 
-				this.layerCollection.sort((first, second) => {
-					let result = first.sum - second.sum;
-					if (result === 0) {
-						return first.n - second.n;
-					}
-					return result;
-				});
+				this.layerCollection.sort(aufbauOrder);
 
 				for (let layer of this.layerCollection) {
 					if (layer.canBeUsed()) {
@@ -99,14 +101,23 @@ class Controller {
 		}
 
 		if (this.element.electronNumber in this.exceptions) {
-			let orbitals = new Array(this.element.orbitals.length)
+			let orbitals = []
 			for (let orbital of this.element.orbitals) {
 				orbitals[mathModel(orbital.n, orbital.type)] = orbital
 			}
 
 			for (let index in this.exceptions[this.element.electronNumber]) {
-				orbitals[parseInt(index)].electronNumber = this.exceptions[this.element.electronNumber][index]
+				index = parseInt(index)
+				if (typeof orbitals[index] === 'undefined') {
+					let k = Math.floor(0.5 + Math.sqrt(1 + 8 * index) / 2)
+					let l = index - k * (k - 1) / 2
+					orbitals[index] = new Orbital(l, k)
+					this.element.orbitals.push(orbitals[index])
+				}
+				orbitals[index].electronNumber = this.exceptions[this.element.electronNumber][index]
 			}
+
+			this.element.orbitals.sort(aufbauOrder)
 		}
 	}
 }

@@ -4,9 +4,67 @@
 	<meta charset="utf-8">
 	<title>{ifset title}{include title|stripHtml} | {/ifset}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style></style>
+	<link rel="stylesheet" href="{$basePath}/css/bootstrap.min_4.3.1.css">
+	<link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+	<script src="{$basePath}/js/vue.min_2.6.7.js"></script>
+	<style>
+		html {
+			height: 100%;
+		}
+
+		body {
+			font-family: Ubuntu, sans-serif;
+			background: url("assets/points.svg") #20012D;
+			background-size: 40%;
+			color: #fff;
+		}
+
+		hr {
+			height: 0;
+			border-top: 5px dashed #9400a5;
+		}
+
+		#navbar a {
+			color: #fff;
+			font-size: 2.5rem;
+			display: inline-block;
+			margin: 0 0.2em;
+		}
+
+		#navbar a:hover, .active {
+			text-decoration: none;
+			border-top: 3px solid #fff;
+			border-bottom: 3px solid #fff;
+		}
+
+		.content {
+			font-size: 2rem;
+		}
+	</style>
+	{include style}
 </head>
 <body>
-{include content}
+<div class="container">
+	<div id="navbar" class="row mt-5 justify-content-center">
+		<a n:href="Homepage:" n:class="$presenter->isLinkCurrent('Homepage:') ? active">Home</a>
+		<a href="#">Test</a>
+		<a href="#">About</a>
+	</div>
+	<hr>
+</div>
+<div class="container mt-4 content">
+	{include content}
+</div>
+<script src="{$basePath}/js/model.js"></script>
+<script>
+	let exceptions = {$exceptions};
+	let elements = {$elements};
+	let maxProtonNumber = elements[elements.length - 1][0]
+
+	function sortElements() {
+		elements.sort((first, second) => first[1].localeCompare(second[1]))
+	}
+</script>
+{include script}
 </body>
 </html>

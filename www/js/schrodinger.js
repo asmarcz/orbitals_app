@@ -11,7 +11,7 @@ function factorial(num) {
 function schrodinger(n, l, m, step = 0.1, radius = 0.1) {
 	let output = []
 	let info = []
-	for (let theta = 0; theta < 2 * Math.PI; theta += step) {
+	for (let theta = 0; theta < Math.PI; theta += step) {
 		for (let phi = 0; phi < 2 * Math.PI; phi += step) {
 			for (let r = 0; r <= 30; r += radius) {
 				let schro1 = (-1) ** ((m + Math.abs(m) + 2) / 2) * (1 / (n ** (l + 2))) * Math.sqrt((factorial(n - l - 1) * factorial(n + l) * factorial(l - Math.abs(m)) * (2 * l + 1)) / (Math.PI * factorial(l + Math.abs(m))))
@@ -40,7 +40,7 @@ function schrodinger(n, l, m, step = 0.1, radius = 0.1) {
 					let x = r * sinTheta * Math.cos(phi)
 					let y = r * sinTheta * Math.sin(phi)
 					let z = r * Math.cos(theta)
-					output.push([x, y, z])
+					output.push(x, y, z)
 					info.push(schro > 0 ? 1 : 0)
 				}
 			}

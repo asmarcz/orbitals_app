@@ -3,9 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<title>{ifset title}{include title|stripHtml} | {/ifset}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="theme-color" content="#20012D">
 	<link rel="stylesheet" href="{$basePath}/css/bootstrap.min_4.3.1.css">
 	<link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+	<link rel="shortcut icon" type="image/png" href="{$basePath}/favicon.png">
 	<script src="{$basePath}/js/vue.min_2.6.7.js"></script>
 	<style>
 		html {
@@ -44,8 +46,20 @@
 		[v-cloak] {
 			display: none;
 		}
+
+		.verticalHorizontalAlign {
+			top: 50%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			-moz-transform: translate(-50%, -50%);
+			-ms-transform: translate(-50%, -50%);
+			-o-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+		}
 	</style>
-	{include style}
+	{ifset #style}
+		{include style}
+	{/ifset}
 </head>
 <body>
 <div class="container">
@@ -60,15 +74,22 @@
 	{include content}
 </div>
 <script src="{$basePath}/js/model.js"></script>
+<script src="{$basePath}/js/schrodinger.js"></script>
+<script src="{$basePath}/js/three.min.js"></script>
+<script src="{$basePath}/js/OrbitControls.js"></script>
 <script>
 	let exceptions = {$exceptions};
 	let elements = {$elements};
+	let ranges = {$ranges};
+	let layers = {$layers};
 	let maxProtonNumber = elements[elements.length - 1][0]
 
 	function sortElements() {
 		elements.sort((first, second) => first[1].localeCompare(second[1]))
 	}
 </script>
-{include script}
+{ifset #script}
+	{include script}
+{/ifset}
 </body>
 </html>

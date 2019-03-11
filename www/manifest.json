@@ -1,0 +1,15 @@
+{
+  "short_name": "Ahoj",
+  "name": "Ahoj",
+  "icons": [
+	{
+	  "src":"favicon.png",
+	  "sizes": "192x192",
+	  "type": "image/png"
+	}
+  ],
+  "start_url": "",
+  "background_color": "#20012D",
+  "theme_color": "#20012D",
+  "display": "standalone"
+}

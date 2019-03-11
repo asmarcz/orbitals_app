@@ -14,6 +14,14 @@ function calcOrientationNumber(l) {
 	return l * 2 + 1;
 }
 
+function getOrientations(l) {
+	let tmp = []
+	for (let i = -l; i <= l; i++) {
+		tmp.push(i)
+	}
+	return tmp
+}
+
 function maxOrbitalElectronNumber(type) {
 	return calcOrientationNumber(type) * 2;
 }
@@ -33,6 +41,40 @@ function getOrbitalTypeText(number) {
 		default:
 			return number;
 	}
+}
+
+function getValenceIndexes(orbitalsArray, protonNumber, ranges, layers) {
+	if (orbitalsArray.length === 1) {
+		return [0]
+	}
+
+	function findLast(type, n = null) {
+		for (let i = orbitalsArray.length - 1; i >= 0; i--) {
+			if (orbitalsArray[i].type === type && (orbitalsArray[i].n === n || n === null)) {
+				return i
+			}
+		}
+		return -1
+	}
+
+	let lastLayer
+	for (let i = 1; i <= layers.length; i++) {
+		if (layers[i].includes(protonNumber)) {
+			lastLayer = i
+		}
+	}
+
+	if (ranges[0].includes(protonNumber)) {
+		return [findLast(0, lastLayer)]
+	} else if (ranges[1].includes(protonNumber)) {
+		return [findLast(0, lastLayer), findLast(1, lastLayer)]
+	} else if (ranges[2].includes(protonNumber)) {
+		return [findLast(0, lastLayer), findLast(2, lastLayer - 1)]
+	} else if (ranges[3].includes(protonNumber)) {
+		return [findLast(0, lastLayer), findLast(2, lastLayer - 1), findLast(3, lastLayer - 2)]
+	}
+
+	return -1
 }
 
 class Controller {
@@ -123,17 +165,17 @@ class Controller {
 }
 
 class Orbital {
-	constructor(type, n, electronNumber = false) {
+	constructor(type, n, electronNumber = maxOrbitalElectronNumber(type)) {
 		this.type = type;
 		this.n = n;
-		this.electronNumber = electronNumber ? electronNumber : maxOrbitalElectronNumber(type);
+		this.electronNumber = electronNumber;
 	}
 }
 
 class Element {
-	constructor(protonNumber) {
+	constructor(protonNumber, electronNumber = protonNumber) {
 		this.protonNumber = protonNumber;
-		this.electronNumber = protonNumber;
+		this.electronNumber = electronNumber;
 		this.countNumber = 0;
 		/** @type Orbital[] */
 		this.orbitals = [];

@@ -18,6 +18,8 @@ $configurator->addConfig(__DIR__ . '/config/config.neon');
 $configurator->addConfig(__DIR__ . '/config/config.local.neon');
 $configurator->addConfig(__DIR__ . '/config/exceptions.neon');
 $configurator->addConfig(__DIR__ . '/config/elements.neon');
+$configurator->addConfig(__DIR__ . '/config/ranges.neon');
+$configurator->addConfig(__DIR__ . '/config/layers.neon');
 
 $container = $configurator->createContainer();
 

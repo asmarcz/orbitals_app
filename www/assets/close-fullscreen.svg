@@ -1,0 +1,13 @@
+<svg viewBox="0 0 600 600" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<g id="arrow" fill="#ddd">
+			<rect x="0" y="0" height="50" width="150"/>
+			<rect transform="rotate(-90,150, 50)" x="50" y="0" height="50" width="150"/>
+			<rect transform="rotate(-45, 114.64, 0)" x="-185.36" y="0" height="50" width="300"/>
+		</g>
+	</defs>
+	<use x="202.51" y="247.49" transform="rotate(180, 352.51, 247.49)" xlink:href="#arrow" href="#arrow"/>
+	<use x="97.49" y="247.49" transform="rotate(90, 247.49, 247.49)" xlink:href="#arrow" href="#arrow"/>
+	<use x="97.49" y="352.51" xlink:href="#arrow" href="#arrow"/>
+	<use x="202.51" y="352.51" transform="rotate(-90, 352.51, 352.51)" xlink:href="#arrow" href="#arrow"/>
+</svg>

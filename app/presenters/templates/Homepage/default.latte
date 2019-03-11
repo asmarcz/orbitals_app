@@ -8,6 +8,12 @@
 			text-indent: 0.5em;
 		}
 
+		@-moz-document url-prefix() {
+			#calc-select {
+				text-indent: 0.25em;
+			}
+		}
+
 		#calc-submit {
 			background-color: #282828;
 			border: 4px solid rgba(173, 181, 189, 0.5);
@@ -21,34 +27,89 @@
 			overflow: auto;
 		}
 
-		#orbitals-table td, th {
+		#orbitals-table tr:nth-of-type(2n+1) td, #orbitals-table th {
 			border: 5px solid;
 			border-image: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(134, 134, 134, 1) 50%, rgba(0, 0, 0, 1) 100%) 35%;
+		}
+
+		.valence {
+			background-color: rgba(91, 51, 120);
+		}
+
+		.canvas {
+			border-radius: 10px;
+			background-color: rgba(0, 0, 0, 0.7);
+		}
+
+		.arrow-wrap {
+			height: calc(1.5em + 12px);
+			padding: 3px;
+		}
+
+		.canvas:hover, #orbitals-table tbody tr:nth-of-type(2n+1):hover {
+			cursor: pointer;
+		}
+
+		#orbitals-table tbody tr:nth-of-type(2n+1):hover {
+			box-shadow: 0 0 25px 5px #ddd;
+		}
+
+		.renderer {
+			top: 0;
+			left: 0;
+		}
+
+		.hide-icon {
+			transform: rotate(180deg);
+		}
+
+		.btn-fullscreen {
+			right: 0.5em;
+			bottom: 0.5em;
+			height: 40px;
+		}
+
+		.m-toolbar {
+			background-color: #707070;
+			border-radius: 10px;
+		}
+
+		.m-toolbar label {
+			background-color: #252525;
+			border-radius: 10px;
+			cursor: pointer;
+		}
+
+		.m-toolbar input[type="radio"]:checked + label {
+			background-color: #fff;
+			border: 4px solid #252525;
+			color: #252525;
 		}
 	</style>
 {/block}
 
 {block content}
 	<div id="app">
-		<div class="row justify-content-center">
+		<form @submit.prevent="calculate" class="row justify-content-center">
 			<div class="col-12 text-center">
 				Check this out!
 			</div>
 			<div class="col-12 col-md-6 col-lg-4 mt-2">
-				<input v-model.number="inputNumber" id="calc-input" class="w-100" type="number"
+				<input v-model.number="inputNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
 					   placeholder="Proton number...">
 			</div>
 			<div class="col-4 col-md-4 col-lg-3 mt-2">
-				<select v-model="inputNumber" id="calc-select" class="w-100 h-100">
+				<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
 					<option value="">Z</option>
-					<option v-for="element in elements" v-bind:value="element[0]">{{ element[1] }}</option>
+					<option v-for="element in elements" :value="element[0]">{{ element[1] }}</option>
 				</select>
 			</div>
-			<div class="col-8 col-md-4 col-lg-3 mt-2">
-				<button @click="calculate" id="calc-submit" class="w-100">Calculate</button>
+			<div class="col-8 col-md-10	 col-lg-3 mt-2">
+				<input id="calc-submit" type="submit" class="w-100" value="Calculate">
 			</div>
-		</div>
-		<div v-if="show" class="row mt-3">
+		</form>
+		<div v-if="protonNumber" v-cloak class="row mt-3">
+			<div class="col-12 text-center">{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}</div>
 			<div class="col-12">
 				<table id="orbitals-table" class="w-100 text-center">
 					<thead>
@@ -59,15 +120,68 @@
 							<span class="d-none d-md-inline">Quantum number</span>
 						</th>
 						<th>Type</th>
-						<th>Electrons</th>
+						<th colspan="2">
+							<span class="d-sm-none">e<sup>-</sup> #</span>
+							<span class="d-none d-sm-inline">Electrons</span>
+						</th>
 					</tr>
 					</thead>
 					<tbody>
-					<tr v-for="orbital in orbitals">
-						<td>{{ orbital.n }}</td>
-						<td>{{ getOrbitalTypeText(orbital.type) }}</td>
-						<td>{{ orbital.electronNumber }}</td>
-					</tr>
+					<template v-for="(orbital, index) in orbitals">
+						<tr @click="toggleOpen(index, $event)" :class="valenceIndexes.includes(index) ? 'valence' : ''">
+							<td>{{ orbital.n }}</td>
+							<td>{{ getOrbitalTypeText(orbital.type) }}</td>
+							<td>{{ orbital.electronNumber }}</td>
+							<td>
+								<div class="arrow-wrap">
+									<img :src="getRowIconAddress(opened !== index)" class="h-100 hide-icon" alt="expand plus button or hide button">
+								</div>
+							</td>
+						</tr>
+						<tr :class="{'d-none': opened !== index}">
+							<td colspan="4" class="container-fluid">
+								<form class="m-toolbar mt-3 p-1">
+									Magnetic number<br>
+									<template v-for="(m, i) in getOrientations(orbital.type)">
+										<input v-model="mS[index]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
+										<label :for="'radio' + index + '-' + i" class="d-inline-block m-0 px-2 py-0">{{ m }}</label>
+									</template>
+								</form>
+								<div @click.stop="addModel(index, $event)" class="canvas row overflow-hidden position-relative mx-auto mt-2 mb-2 pt-2 pb-2">
+									<div @click="enableKeys(index)" class="renderer invisible position-absolute w-100 h-100">
+										<div class="position-absolute" style="color: #f00;"></div>
+										<img @click="toggleFullscreen(index)" class="btn-fullscreen position-absolute" :src="getFullscreenIconAddress(index)" alt="open or close fullscreen">
+									</div>
+									<template v-if="!models.includes(index) && isWebGLAvailable">
+										<div class="col-6">
+											<svg height="70%" width="80%" class="position-relative verticalHorizontalAlign" viewBox="0 0 91 104" xmlns="http://www.w3.org/2000/svg">
+												<polygon stroke="#ddd" stroke-width="4px" stroke-linejoin="round" fill="none" points="2,2 2,102 89,52"></polygon>
+											</svg>
+										</div>
+										<div class="col-6">
+											<div class="position-relative verticalHorizontalAlign">
+												Show 3D model of orbital.
+											</div>
+										</div>
+									</template>
+									<template v-else-if="isWebGLAvailable">
+										<div class="col-12">
+											<div class="position-relative verticalHorizontalAlign">
+												This will take a moment...
+											</div>
+										</div>
+									</template>
+									<template v-else>
+										<div class="col-12">
+											<div class="position-relative verticalHorizontalAlign">
+												Your browser doesn't support WebGL.
+											</div>
+										</div>
+									</template>
+								</div>
+							</td>
+						</tr>
+					</template>
 					</tbody>
 				</table>
 			</div>
@@ -77,13 +191,186 @@
 
 {block script}
 	<script>
+		function isWebGLAvailable() {
+			try {
+				let canvas = document.createElement('canvas')
+				return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')))
+			} catch (e) {
+				return false
+			}
+		}
+
+		class Visualization {
+			constructor(element) {
+				this.renderEl = element
+				this.frames = 0
+				this.lastTime = -1
+				this.continue = true
+				this.isFullscreen = false
+				this.currentIndex = 0
+				this.maxIndex = 25
+				this.frameRates = new Array(this.maxIndex + 1)
+				this.averageFrameRate = null
+				this.needsDownsize = 0
+				this.needsUpsize = 0
+				this.width = this.renderEl.clientWidth
+				this.height = this.renderEl.clientHeight
+
+				// arrow function to keep reference of this to current object
+				this.animate = (time) => {
+					this.renderer.render(this.scene, this.camera)
+					this.frames++
+
+					if (this.currentIndex === this.maxIndex + 1) {
+						this.currentIndex = 0
+					}
+					this.frameRates[this.currentIndex] = this.frames / (time - this.lastTime) * 1000
+					this.currentIndex++
+					this.averageFrameRate = Math.round(this.frameRates.reduce((sum, el) => sum + el) / this.frameRates.length)
+					this.renderEl.children[0].innerHTML = this.averageFrameRate + ' FPS'
+
+					if (this.averageFrameRate < 35) {
+						this.needsDownsize++
+						if (this.needsDownsize === this.maxIndex) {
+							this.needsDownsize = 0
+							let newWidth = this.width * 0.8
+							if (Math.ceil(newWidth) >= this.renderEl.clientWidth / 2) {
+								this.width = newWidth
+								this.height = this.height * 0.8
+								this.renderer.setSize(this.width, this.height, false)
+							}
+						}
+					} else {
+						this.needsDownsize = 0
+					}
+
+					if (this.averageFrameRate > 55) {
+						this.needsUpsize++
+						if (this.needsUpsize === this.maxIndex) {
+							this.needsUpsize = 0
+							let newWidth = this.width * 1.25
+							if (Math.floor(newWidth) <= this.renderEl.clientWidth) {
+								this.width = newWidth
+								this.height = this.height * 1.25
+								this.renderer.setSize(this.width, this.height, false)
+							}
+						}
+					} else {
+						this.needsUpsize = 0
+					}
+
+					if (time >= this.lastTime + 1000) {
+						this.lastTime = time
+						this.frames = 0
+					}
+
+					if (this.continue) {
+						requestAnimationFrame(this.animate)
+					}
+				}
+			}
+
+			init(n, l, m, step, radius) {
+				this.scene = new THREE.Scene();
+				this.renderer = new THREE.WebGLRenderer({ antialias: true })
+				this.renderer.setPixelRatio(window.devicePixelRatio)
+				this.renderer.setSize(this.renderEl.clientWidth, this.renderEl.clientHeight, false)
+				this.renderEl.appendChild(this.renderer.domElement)
+				this.renderer.domElement.classList.add('w-100', 'h-100')
+				this.camera = new THREE.PerspectiveCamera(40, this.renderEl.clientWidth / this.renderEl.clientHeight, 1, 1000)
+				this.camera.position.set(15, 20, 30)
+				this.scene.add(this.camera)
+				this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
+				this.scene.add(new THREE.AxesHelper(20))
+
+				window.addEventListener('resize', () => {
+					this.onWindowResize()
+				}, false)
+
+				this.prepareScene(n, l, m, step, radius)
+
+				this.animate(0)
+			}
+
+			prepareScene(n, l, m, step, radius) {
+				let geometry = new THREE.BufferGeometry()
+				let colors = []
+
+				let [positions, info] = schrodinger(n, l, m, step, radius)
+
+				for (let i of info) {
+					colors.push(i, 0, 1)
+				}
+
+				geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+				geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+
+				let material = new THREE.PointsMaterial({ size: 1, vertexColors: THREE.VertexColors })
+				let points = new THREE.Points(geometry, material)
+
+				this.scene.add(points)
+			}
+
+			onWindowResize() {
+				this.width = this.renderEl.clientWidth
+				this.height = this.renderEl.clientHeight
+				this.renderer.setSize(this.width, this.height, false)
+				this.camera.aspect = this.width / this.height
+				this.camera.updateProjectionMatrix()
+			}
+
+			openFullscreen() {
+				if (this.renderEl.requestFullscreen) {
+					this.renderEl.requestFullscreen()
+				} else if (this.renderEl.mozRequestFullScreen) {
+					this.renderEl.mozRequestFullScreen()
+				} else if (this.renderEl.webkitRequestFullscreen) {
+					this.renderEl.webkitRequestFullscreen()
+				} else if (this.renderEl.msRequestFullscreen) {
+					this.renderEl.msRequestFullscreen()
+				}
+			}
+		}
+	</script>
+	<script>
 		sortElements()
+
+		function setHeight(el) {
+			let styles = getComputedStyle(el)
+			if (window.innerHeight > window.innerWidth) {
+				el.style.height = styles.width
+			} else {
+				el.style.height = styles.height
+			}
+		}
+
+		function closeFullscreen() {
+			if (document.exitFullscreen) {
+				document.exitFullscreen()
+			} else if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen()
+			} else if (document.webkitExitFullscreen) {
+				document.webkitExitFullscreen()
+			} else if (document.msExitFullscreen) {
+				document.msExitFullscreen()
+			}
+		}
+
+		let keysFlag = false
+
 		var app = new Vue({
 			el: '#app',
-			data: {
-				inputNumber: "",
-				protonNumber: 0,
-				show: false
+			data() {
+				return {
+					inputNumber: '',
+					protonNumber: 0,
+					opened: null,
+					hash: '',
+					models: [],
+					visualizations: [],
+					isWebGLAvailable: isWebGLAvailable(),
+					mS: [],
+				}
 			},
 			computed: {
 				orbitals: function () {
@@ -93,6 +380,12 @@
 					controller.initiate()
 					controller.checkExceptions()
 					return element.orbitals.filter(orbital => orbital.electronNumber > 0)
+				},
+				elementIndex: function () {
+					return elements.findIndex((e) => e[0] === this.protonNumber)
+				},
+				valenceIndexes: function () {
+					return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
 				}
 			},
 			methods: {
@@ -102,11 +395,123 @@
 					} else if (this.inputNumber !== Math.floor(this.inputNumber)) {
 						alert('Proton number must be an integer not a float.')
 					} else {
-						this.show = true
 						this.protonNumber = this.inputNumber
+						window.location.hash = '#' + this.protonNumber
+					}
+				},
+				toggleOpen: function (index, ev) {
+					if (typeof this.visualizations[this.opened] !== 'undefined') {
+						this.visualizations[this.opened].continue = false
+					}
+					if (this.opened === index) {
+						this.opened = null
+					} else {
+						this.opened = index
+						if (typeof this.visualizations[this.opened] !== 'undefined') {
+							this.visualizations[this.opened].continue = true
+							this.visualizations[this.opened].animate(0)
+						}
+
+						let el = ev.currentTarget.nextElementSibling
+						let canvas = el.querySelector('.canvas')
+						this.$nextTick(function () {
+							setHeight(canvas)
+
+							let bottom = el.getBoundingClientRect().bottom
+							if (bottom > window.innerHeight) {
+								window.scrollTo({
+									top: document.documentElement.scrollTop + bottom - window.innerHeight,
+									behavior: 'smooth'
+								})
+							}
+						})
+					}
+				},
+				addModel: function (index, ev) {
+					keysFlag = true
+					if (!this.models.includes(index) && this.isWebGLAvailable) {
+						this.models.push(index)
+						let orbital = this.orbitals[index]
+						let visualizationElement = ev.currentTarget.children[0]
+
+						// use instead of $nextTick to force browser to repaint and show user wait message
+						// Google search: double requestAnimationFrame
+						requestAnimationFrame(() => {
+							requestAnimationFrame(() => {
+								this.changeVisualization(visualizationElement, index, orbital.n, orbital.type, this.mS[index], 0.1, 0.2)
+							})
+						})
+					}
+				},
+				changeVisualization: function (element, index, n, l, m, step, radius) {
+					let visualization = new Visualization(element)
+					visualization.init(n, l, m, step, radius)
+					element.style.zIndex = '1'
+					element.classList.remove('invisible')
+					this.$set(this.visualizations, index, visualization)
+				},
+				enableKeys: function (index) {
+					this.visualizations[index].controls.enableKeys = true
+				},
+				getRowIconAddress: function (show) {
+					return {$basePath} + '/assets/' + (show ? 'plus' : 'hide') + '.svg'
+				},
+				getFullscreenIconAddress: function (index) {
+					return {$basePath} + '/assets/' + (typeof this.visualizations[index] !== 'undefined' && this.visualizations[index].isFullscreen ? 'close' : 'open') + '-fullscreen.svg'
+				},
+				toggleFullscreen: function (index) {
+					if (this.visualizations[index].isFullscreen) {
+						closeFullscreen()
+					} else {
+						this.visualizations[index].isFullscreen = true
+						this.visualizations[index].openFullscreen()
+					}
+				},
+			},
+			beforeMount() {
+				this.hash = window.location.hash
+			},
+			watch: {
+				hash: function () {
+					let afterHash = parseInt(this.hash.substring(1))
+					if (afterHash > 0 && afterHash <= maxProtonNumber) {
+						this.protonNumber = this.inputNumber = afterHash
+					}
+				},
+				orbitals: function () {
+					this.mS = (new Array(this.orbitals.length)).fill(0)
+				},
+				mS: function () {
+					if (typeof this.visualizations[this.opened] !== 'undefined') {
+						let element = this.visualizations[this.opened].renderEl
+						element.querySelector('canvas').remove()
+						let orbital = this.orbitals[this.opened]
+						element.style.zIndex = 'auto'
+						element.classList.add('invisible')
+						this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
+					}
+				},
+			},
+		})
+
+		window.addEventListener('popstate', function () {
+			app.hash = window.location.hash
+		})
+		window.addEventListener('click', function () {
+			if (keysFlag) {
+				for (let visualization of app.visualizations) {
+					if (typeof visualization !== 'undefined') {
+						visualization.controls.enableKeys = false
 					}
 				}
+				keysFlag = false
 			}
+		})
+		window.addEventListener('fullscreenchange', function () {
+			if (document.fullscreenElement === null) {
+				app.visualizations[app.opened].isFullscreen = false
+			}
+			app.visualizations[app.opened].onWindowResize()
 		})
 	</script>
 {/block}

@@ -364,12 +364,15 @@
 				return {
 					inputNumber: '',
 					protonNumber: 0,
+					electronNumber: 0,
 					opened: null,
 					hash: '',
 					models: [],
 					visualizations: [],
 					isWebGLAvailable: isWebGLAvailable(),
 					mS: [],
+					showLong: true,
+					showShort: true,
 				}
 			},
 			computed: {
@@ -386,6 +389,26 @@
 				},
 				valenceIndexes: function () {
 					return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
+				},
+				shortOrbitals: function () {
+					let lastNobleGas
+					for (let i = nobleGases.length - 1; i >= 0; i--) {
+						if (nobleGases[i] < this.protonNumber) {
+							lastNobleGas = nobleGases[i]
+						}
+					}
+					let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 1 : layers.findIndex(array => array.includes(this.protonNumber)))
+					return this.orbitals.filter(function (orbital) {
+						if (orbital.n === seekedLayer && (orbital.type === 0 || orbital.type === 1)) {
+							return true
+						} else if (orbital.n === seekedLayer - 1 && orbital.type === 2) {
+							return true
+						} else if (orbital.n === seekedLayer - 2 && orbital.type === 3) {
+							return true
+						} else {
+							return false
+						}
+					})
 				}
 			},
 			methods: {
@@ -396,6 +419,7 @@
 						alert('Proton number must be an integer not a float.')
 					} else {
 						this.protonNumber = this.inputNumber
+						this.electronNumber = this.inputNumber
 						window.location.hash = '#' + this.protonNumber
 					}
 				},

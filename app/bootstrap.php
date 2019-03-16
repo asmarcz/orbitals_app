@@ -20,6 +20,7 @@ $configurator->addConfig(__DIR__ . '/config/exceptions.neon');
 $configurator->addConfig(__DIR__ . '/config/elements.neon');
 $configurator->addConfig(__DIR__ . '/config/ranges.neon');
 $configurator->addConfig(__DIR__ . '/config/layers.neon');
+$configurator->addConfig(__DIR__ . '/config/noble_gases.neon');
 
 $container = $configurator->createContainer();
 

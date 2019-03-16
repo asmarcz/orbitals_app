@@ -58,9 +58,9 @@ function getValenceIndexes(orbitalsArray, protonNumber, ranges, layers) {
 	}
 
 	let lastLayer
-	for (let i = 1; i <= layers.length; i++) {
+	for (let i = 0; i < layers.length; i++) {
 		if (layers[i].includes(protonNumber)) {
-			lastLayer = i
+			lastLayer = i + 1
 		}
 	}
 

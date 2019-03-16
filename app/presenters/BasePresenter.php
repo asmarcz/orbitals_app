@@ -17,5 +17,6 @@ abstract class BasePresenter extends Nette\Application\UI\Presenter
 		$this->template->elements = $this->context->parameters['elements'];
 		$this->template->ranges = $this->context->parameters['ranges'];
 		$this->template->layers = $this->context->parameters['layers'];
+		$this->template->nobleGases = $this->context->parameters['noble_gases'];
 	}
 }

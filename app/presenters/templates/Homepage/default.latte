@@ -1,9 +1,13 @@
 {block style}
 	<style>
+		#calc-form *:focus {
+			outline: none;
+		}
+
 		#calc-input, #calc-select {
 			background-color: #282828;
 			border-radius: 10px;
-			border: 4px solid rgba(173, 181, 189, 0.5);
+			border: 4px solid rgb(107, 110, 115);
 			color: #fff;
 			text-indent: 0.5em;
 		}
@@ -16,8 +20,28 @@
 
 		#calc-submit {
 			background-color: #282828;
-			border: 4px solid rgba(173, 181, 189, 0.5);
+			border: 4px solid rgb(107, 110, 115);
 			color: #fff;
+		}
+
+		#calc-checkbox-wrapper {
+			background-color: #282828;
+			border: 4px solid rgb(107, 110, 115);
+		}
+
+		#calc-checkbox {
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+			width: 1.5em;
+			height: 1.5em;
+			border: 4px solid rgb(107, 110, 115);
+			border-radius: 9px;
+			background-color: #282828;
+		}
+
+		#calc-checkbox:checked {
+			background-color: rgb(91, 51, 120);
 		}
 
 		#orbitals-table {
@@ -33,7 +57,7 @@
 		}
 
 		.valence {
-			background-color: rgba(91, 51, 120);
+			background-color: rgb(91, 51, 120);
 		}
 
 		.canvas {
@@ -90,26 +114,41 @@
 
 {block content}
 	<div id="app">
-		<form @submit.prevent="calculate" class="row justify-content-center">
-			<div class="col-12 text-center">
-				Check this out!
+		<form id="calc-form" @submit.prevent="calculate">
+			<div class="row justify-content-center">
+				<div class="col-12 text-center">
+					Check this out!
+				</div>
+				<div class="col-7 col-md-6 col-lg-4 mt-2">
+					<input v-model.number="inputNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
+						   placeholder="Proton number...">
+				</div>
+				<div class="col-5 col-md-4 col-lg-3 mt-2">
+					<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
+						<option value="">Z</option>
+						<option v-for="element in elements" :value="element[0]">{{ element[1] }}</option>
+					</select>
+				</div>
 			</div>
-			<div class="col-12 col-md-6 col-lg-4 mt-2">
-				<input v-model.number="inputNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
-					   placeholder="Proton number...">
-			</div>
-			<div class="col-4 col-md-4 col-lg-3 mt-2">
-				<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
-					<option value="">Z</option>
-					<option v-for="element in elements" :value="element[0]">{{ element[1] }}</option>
-				</select>
-			</div>
-			<div class="col-8 col-md-10	 col-lg-3 mt-2">
-				<input id="calc-submit" type="submit" class="w-100" value="Calculate">
+			<div class="row justify-content-center">
+				<div class="col-12 col-md-6 col-lg-4 mt-2">
+					<div id="calc-checkbox-wrapper" class="text-center p-1">
+						<input v-model="inputShort" id="calc-checkbox" class="align-top" type="checkbox">
+						<label class="mb-0 ml-2 align-top" for="calc-checkbox">
+							<span>Show short</span>
+						</label>
+					</div>
+				</div>
+				<div class="col-12 col-md-4 col-lg-3 mt-2">
+					<input id="calc-submit" type="submit" class="w-100 p-1" value="Calculate">
+				</div>
 			</div>
 		</form>
 		<div v-if="protonNumber" v-cloak class="row mt-3">
-			<div class="col-12 text-center">{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}</div>
+			<div class="col-12 text-center">
+				<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
+				{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}
+			</div>
 			<div class="col-12">
 				<table id="orbitals-table" class="w-100 text-center">
 					<thead>
@@ -127,7 +166,7 @@
 					</tr>
 					</thead>
 					<tbody>
-					<template v-for="(orbital, index) in orbitals">
+					<template v-for="(orbital, index) in displayOrbitals">
 						<tr @click="toggleOpen(index, $event)" :class="valenceIndexes.includes(index) ? 'valence' : ''">
 							<td>{{ orbital.n }}</td>
 							<td>{{ getOrbitalTypeText(orbital.type) }}</td>
@@ -371,7 +410,7 @@
 					visualizations: [],
 					isWebGLAvailable: isWebGLAvailable(),
 					mS: [],
-					showLong: true,
+					inputShort: true,
 					showShort: true,
 				}
 			},
@@ -388,7 +427,7 @@
 					return elements.findIndex((e) => e[0] === this.protonNumber)
 				},
 				valenceIndexes: function () {
-					return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
+					return getValenceIndexes(this.displayOrbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
 				},
 				shortOrbitals: function () {
 					let lastNobleGas
@@ -397,7 +436,7 @@
 							lastNobleGas = nobleGases[i]
 						}
 					}
-					let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 1 : layers.findIndex(array => array.includes(this.protonNumber)))
+					let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 0 : layers.findIndex(array => array.includes(this.protonNumber)))
 					return this.orbitals.filter(function (orbital) {
 						if (orbital.n === seekedLayer && (orbital.type === 0 || orbital.type === 1)) {
 							return true
@@ -409,7 +448,26 @@
 							return false
 						}
 					})
-				}
+				},
+				displayOrbitals: function () {
+					if (this.showShort) {
+						return this.shortOrbitals
+					} else {
+						return this.orbitals
+					}
+				},
+				nobleGasNumber: function () {
+					for (let i = nobleGases.length; 0 <= i; i--) {
+						if (nobleGases[i] < this.protonNumber) {
+							return nobleGases[i]
+						}
+					}
+
+					return -1
+				},
+				nobleGasIndex: function () {
+					return elements.findIndex(el => el[0] === this.nobleGasNumber)
+				},
 			},
 			methods: {
 				calculate: function () {
@@ -421,6 +479,7 @@
 						this.protonNumber = this.inputNumber
 						this.electronNumber = this.inputNumber
 						window.location.hash = '#' + this.protonNumber
+						this.showShort = this.inputShort
 					}
 				},
 				toggleOpen: function (index, ev) {

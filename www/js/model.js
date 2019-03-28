@@ -105,8 +105,8 @@ class Controller {
 				this.hasMore();
 			} else {
 				let newestLayer, secondNewestLayer;
-				let secondMaxN = this.maxN - 1, collectionLength = this.layerCollection.length;
-				for (let i = 0; i < collectionLength; i++) {
+				let secondMaxN = this.maxN - 1;
+				for (let i = 0; i < this.layerCollection.length; i++) {
 					if (this.layerCollection[i].n === secondMaxN) {
 						secondNewestLayer = this.layerCollection[i];
 						newestLayer = this.layerCollection[i + 1];

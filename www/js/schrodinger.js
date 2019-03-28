@@ -9,11 +9,14 @@ function factorial(num) {
 }
 
 function schrodinger(n, l, m, step = 0.1, radius = 0.1) {
-	let output = []
 	let info = []
+	let psis = []
+	let xs = []
+	let ys = []
+	let zs = []
 	for (let theta = 0; theta < Math.PI; theta += step) {
 		for (let phi = 0; phi < 2 * Math.PI; phi += step) {
-			for (let r = 0; r <= 30; r += radius) {
+			for (let r = 0; r <= 80; r += radius) {
 				let schro1 = (-1) ** ((m + Math.abs(m) + 2) / 2) * (1 / (n ** (l + 2))) * Math.sqrt((factorial(n - l - 1) * factorial(n + l) * factorial(l - Math.abs(m)) * (2 * l + 1)) / (Math.PI * factorial(l + Math.abs(m))))
 				let schro2 = (r ** l) * (Math.E ** (-r / n))
 				let schro3 = 0
@@ -35,16 +38,29 @@ function schrodinger(n, l, m, step = 0.1, radius = 0.1) {
 				}
 				let schro = schro1 * schro2 * schro3 * schro4 * schro5 * schro6
 				schroSquared = schro ** 2
-				if (schroSquared > 10 ** (-5)) {
-					let sinTheta = Math.sin(theta)
-					let x = r * sinTheta * Math.cos(phi)
-					let y = r * sinTheta * Math.sin(phi)
-					let z = r * Math.cos(theta)
-					output.push(x, y, z)
-					info.push(schro > 0 ? 1 : 0)
-				}
+				psis.push(schroSquared)
+
+				let sinTheta = Math.sin(theta)
+				let x = r * sinTheta * Math.cos(phi)
+				let y = r * sinTheta * Math.sin(phi)
+				let z = r * Math.cos(theta)
+				xs.push(x)
+				ys.push(y)
+				zs.push(z)
+				info.push(schro > 0 ? 1 : 0)
 			}
 		}
 	}
-	return [output, info]
+
+	let maxPsi = psis.reduce((a, b) => Math.max(a, b))
+	// David Manthey, Orbital Viewer, https://github.com/manthey/orbitalviewer/blob/aa49e320a1d52e49d4684d30ca8036b70f25c6da/ov.c#L2003-L2016
+	let threshold = Math.log10(maxPsi) - 1 - 0.25 * (n - l)
+	let result = [[], []]
+	for (let i = 0; i < xs.length; i++) {
+		if (psis[i] > 10 ** threshold) {
+			result[0].push(xs[i], ys[i], zs[i])
+			result[1].push(info[i])
+		}
+	}
+	return result
 }

@@ -1,27 +1,9 @@
 {block style}
 	<style>
-		#calc-form *:focus {
-			outline: none;
-		}
-
-		#calc-input, #calc-select {
-			background-color: #282828;
-			border-radius: 10px;
-			border: 4px solid rgb(107, 110, 115);
-			color: #fff;
-			text-indent: 0.5em;
-		}
-
 		@-moz-document url-prefix() {
 			#calc-select {
 				text-indent: 0.25em;
 			}
-		}
-
-		#calc-submit {
-			background-color: #282828;
-			border: 4px solid rgb(107, 110, 115);
-			color: #fff;
 		}
 
 		#calc-checkbox-wrapper {
@@ -42,13 +24,6 @@
 
 		#calc-checkbox:checked {
 			background-color: rgb(91, 51, 120);
-		}
-
-		#orbitals-table {
-			background-color: rgba(52, 58, 64, 0.7);
-			color: #fff;
-			border-collapse: separate;
-			overflow: auto;
 		}
 
 		#orbitals-table tr:nth-of-type(2n+1) td, #orbitals-table th {
@@ -119,18 +94,16 @@
 				<div class="col-12 text-center">
 					Check this out!
 				</div>
-				<div class="col-7 col-md-6 col-lg-4 mt-2">
+				<div class="col-12 col-md-6 col-lg-4 mt-2">
 					<input v-model.number="inputNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
 						   placeholder="Proton number...">
 				</div>
-				<div class="col-5 col-md-4 col-lg-3 mt-2">
-					<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
+				<div class="col-12 col-md-4 col-lg-3 mt-2">
+					<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100 p-1">
 						<option value="">Z</option>
 						<option v-for="element in elements" :value="element[0]">{{ element[1] }}</option>
 					</select>
 				</div>
-			</div>
-			<div class="row justify-content-center">
 				<div class="col-12 col-md-6 col-lg-4 mt-2">
 					<div id="calc-checkbox-wrapper" class="text-center p-1">
 						<input v-model="inputShort" id="calc-checkbox" class="align-top" type="checkbox">
@@ -139,7 +112,7 @@
 						</label>
 					</div>
 				</div>
-				<div class="col-12 col-md-4 col-lg-3 mt-2">
+				<div class="col-12 col-md-4 col-lg-5 mt-2">
 					<input id="calc-submit" type="submit" class="w-100 p-1" value="Calculate">
 				</div>
 			</div>
@@ -182,7 +155,7 @@
 								<form class="m-toolbar mt-3 p-1">
 									Magnetic number<br>
 									<template v-for="(m, i) in getOrientations(orbital.type)">
-										<input v-model="mS[index]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
+										<input v-model="mS[getPrincipleIndex(index)]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
 										<label :for="'radio' + index + '-' + i" class="d-inline-block m-0 px-2 py-0">{{ m }}</label>
 									</template>
 								</form>
@@ -470,6 +443,10 @@
 				},
 			},
 			methods: {
+				getPrincipleIndex: function (i) {
+					let orbital = this.displayOrbitals[i]
+					return mathModel(orbital.n, orbital.type)
+				},
 				calculate: function () {
 					if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
 						alert(`Proton number must be bigger than 0 and smaller than ${ maxProtonNumber + 1 }.`)
@@ -482,17 +459,21 @@
 						this.showShort = this.inputShort
 					}
 				},
-				toggleOpen: function (index, ev) {
-					if (typeof this.visualizations[this.opened] !== 'undefined') {
-						this.visualizations[this.opened].continue = false
+				toggleOpen: function (i, ev) {
+					let index = this.getPrincipleIndex(i)
+					if (this.opened !== null) {
+						let openedIndex = this.getPrincipleIndex(this.opened)
+						if (typeof this.visualizations[openedIndex] !== 'undefined') {
+							this.visualizations[openedIndex].continue = false
+						}
 					}
-					if (this.opened === index) {
+					if (this.opened === i) {
 						this.opened = null
 					} else {
-						this.opened = index
-						if (typeof this.visualizations[this.opened] !== 'undefined') {
-							this.visualizations[this.opened].continue = true
-							this.visualizations[this.opened].animate(0)
+						this.opened = i
+						if (typeof this.visualizations[index] !== 'undefined') {
+							this.visualizations[index].continue = true
+							this.visualizations[index].animate(0)
 						}
 
 						let el = ev.currentTarget.nextElementSibling
@@ -510,11 +491,12 @@
 						})
 					}
 				},
-				addModel: function (index, ev) {
+				addModel: function (i, ev) {
 					keysFlag = true
+					let orbital = this.displayOrbitals[i]
+					let index = mathModel(orbital.n, orbital.type)
 					if (!this.models.includes(index) && this.isWebGLAvailable) {
 						this.models.push(index)
-						let orbital = this.orbitals[index]
 						let visualizationElement = ev.currentTarget.children[0]
 
 						// use instead of $nextTick to force browser to repaint and show user wait message
@@ -533,8 +515,11 @@
 					element.classList.remove('invisible')
 					this.$set(this.visualizations, index, visualization)
 				},
-				enableKeys: function (index) {
-					this.visualizations[index].controls.enableKeys = true
+				enableKeys: function (i) {
+					let index = this.getPrincipleIndex(i)
+					if (true) {
+						this.visualizations[index].controls.enableKeys = true
+					}
 				},
 				getRowIconAddress: function (show) {
 					return {$basePath} + '/assets/' + (show ? 'plus' : 'hide') + '.svg'
@@ -542,7 +527,8 @@
 				getFullscreenIconAddress: function (index) {
 					return {$basePath} + '/assets/' + (typeof this.visualizations[index] !== 'undefined' && this.visualizations[index].isFullscreen ? 'close' : 'open') + '-fullscreen.svg'
 				},
-				toggleFullscreen: function (index) {
+				toggleFullscreen: function (i) {
+					let index = this.getPrincipleIndex(i)
 					if (this.visualizations[index].isFullscreen) {
 						closeFullscreen()
 					} else {
@@ -562,16 +548,26 @@
 					}
 				},
 				orbitals: function () {
-					this.mS = (new Array(this.orbitals.length)).fill(0)
+					let maxIndex = 0
+					for (let orbital of this.orbitals) {
+						let tmp = mathModel(orbital.n, orbital.type)
+						if (tmp > maxIndex) {
+							maxIndex = tmp
+						}
+					}
+					this.mS = (new Array(maxIndex + 1)).fill(0)
 				},
 				mS: function () {
-					if (typeof this.visualizations[this.opened] !== 'undefined') {
-						let element = this.visualizations[this.opened].renderEl
-						element.querySelector('canvas').remove()
-						let orbital = this.orbitals[this.opened]
-						element.style.zIndex = 'auto'
-						element.classList.add('invisible')
-						this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
+					if (this.opened !== null) {
+						let openedIndex = this.getPrincipleIndex(this.opened)
+						if (typeof this.visualizations[openedIndex] !== 'undefined') {
+							let element = this.visualizations[openedIndex].renderEl
+							element.querySelector('canvas').remove()
+							let orbital = this.displayOrbitals[this.opened]
+							element.style.zIndex = 'auto'
+							element.classList.add('invisible')
+							this.changeVisualization(element, openedIndex, orbital.n, orbital.type, this.mS[openedIndex], 0.1, 0.2)
+						}
 					}
 				},
 			},
@@ -591,10 +587,11 @@
 			}
 		})
 		window.addEventListener('fullscreenchange', function () {
+			let openedIndex = app.getPrincipleIndex(app.opened)
 			if (document.fullscreenElement === null) {
-				app.visualizations[app.opened].isFullscreen = false
+				app.visualizations[openedIndex].isFullscreen = false
 			}
-			app.visualizations[app.opened].onWindowResize()
+			app.visualizations[openedIndex].onWindowResize()
 		})
 	</script>
 {/block}

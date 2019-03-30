@@ -139,8 +139,8 @@
 					</tr>
 					</thead>
 					<tbody>
-					<template v-for="(orbital, index) in displayOrbitals">
-						<tr @click="toggleOpen(index, $event)" :class="valenceIndexes.includes(index) ? 'valence' : ''">
+					<template v-for="(orbital, index) in orbitals">
+						<tr @click="toggleOpen(index, $event)" :class="{'valence': valenceIndexes.includes(index), 'd-none': !displayOrbitalsIndexes.includes(index)}">
 							<td>{{ orbital.n }}</td>
 							<td>{{ getOrbitalTypeText(orbital.type) }}</td>
 							<td>{{ orbital.electronNumber }}</td>
@@ -150,12 +150,12 @@
 								</div>
 							</td>
 						</tr>
-						<tr :class="{'d-none': opened !== index}">
+						<tr :class="{'d-none': !displayOrbitalsIndexes.includes(index) || (opened !== index)}">
 							<td colspan="4" class="container-fluid">
 								<form class="m-toolbar mt-3 p-1">
 									Magnetic number<br>
 									<template v-for="(m, i) in getOrientations(orbital.type)">
-										<input v-model="mS[getPrincipleIndex(index)]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
+										<input v-model="mS[index]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
 										<label :for="'radio' + index + '-' + i" class="d-inline-block m-0 px-2 py-0">{{ m }}</label>
 									</template>
 								</form>
@@ -400,9 +400,9 @@
 					return elements.findIndex((e) => e[0] === this.protonNumber)
 				},
 				valenceIndexes: function () {
-					return getValenceIndexes(this.displayOrbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
+					return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
 				},
-				shortOrbitals: function () {
+				shortOrbitalsIndexes: function () {
 					let lastNobleGas
 					for (let i = nobleGases.length - 1; i >= 0; i--) {
 						if (nobleGases[i] < this.protonNumber) {
@@ -410,23 +410,24 @@
 						}
 					}
 					let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 0 : layers.findIndex(array => array.includes(this.protonNumber)))
-					return this.orbitals.filter(function (orbital) {
+					let indexes = []
+					this.orbitals.forEach(function(orbital, i) {
 						if (orbital.n === seekedLayer && (orbital.type === 0 || orbital.type === 1)) {
-							return true
+							indexes.push(i)
 						} else if (orbital.n === seekedLayer - 1 && orbital.type === 2) {
-							return true
+							indexes.push(i)
 						} else if (orbital.n === seekedLayer - 2 && orbital.type === 3) {
-							return true
-						} else {
-							return false
+							indexes.push(i)
 						}
 					})
+
+					return indexes
 				},
-				displayOrbitals: function () {
+				displayOrbitalsIndexes: function () {
 					if (this.showShort) {
-						return this.shortOrbitals
+						return this.shortOrbitalsIndexes
 					} else {
-						return this.orbitals
+						return [...this.orbitals.keys()]
 					}
 				},
 				nobleGasNumber: function () {
@@ -443,10 +444,6 @@
 				},
 			},
 			methods: {
-				getPrincipleIndex: function (i) {
-					let orbital = this.displayOrbitals[i]
-					return mathModel(orbital.n, orbital.type)
-				},
 				calculate: function () {
 					if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
 						alert(`Proton number must be bigger than 0 and smaller than ${ maxProtonNumber + 1 }.`)
@@ -459,18 +456,16 @@
 						this.showShort = this.inputShort
 					}
 				},
-				toggleOpen: function (i, ev) {
-					let index = this.getPrincipleIndex(i)
+				toggleOpen: function (index, ev) {
 					if (this.opened !== null) {
-						let openedIndex = this.getPrincipleIndex(this.opened)
-						if (typeof this.visualizations[openedIndex] !== 'undefined') {
-							this.visualizations[openedIndex].continue = false
+						if (typeof this.visualizations[this.opened] !== 'undefined') {
+							this.visualizations[this.opened].continue = false
 						}
 					}
-					if (this.opened === i) {
+					if (this.opened === index) {
 						this.opened = null
 					} else {
-						this.opened = i
+						this.opened = index
 						if (typeof this.visualizations[index] !== 'undefined') {
 							this.visualizations[index].continue = true
 							this.visualizations[index].animate(0)
@@ -491,13 +486,12 @@
 						})
 					}
 				},
-				addModel: function (i, ev) {
+				addModel: function (index, ev) {
 					keysFlag = true
-					let orbital = this.displayOrbitals[i]
-					let index = mathModel(orbital.n, orbital.type)
 					if (!this.models.includes(index) && this.isWebGLAvailable) {
 						this.models.push(index)
 						let visualizationElement = ev.currentTarget.children[0]
+						let orbital = this.orbitals[index]
 
 						// use instead of $nextTick to force browser to repaint and show user wait message
 						// Google search: double requestAnimationFrame
@@ -515,8 +509,7 @@
 					element.classList.remove('invisible')
 					this.$set(this.visualizations, index, visualization)
 				},
-				enableKeys: function (i) {
-					let index = this.getPrincipleIndex(i)
+				enableKeys: function (index) {
 					if (true) {
 						this.visualizations[index].controls.enableKeys = true
 					}
@@ -527,8 +520,7 @@
 				getFullscreenIconAddress: function (index) {
 					return {$basePath} + '/assets/' + (typeof this.visualizations[index] !== 'undefined' && this.visualizations[index].isFullscreen ? 'close' : 'open') + '-fullscreen.svg'
 				},
-				toggleFullscreen: function (i) {
-					let index = this.getPrincipleIndex(i)
+				toggleFullscreen: function (index) {
 					if (this.visualizations[index].isFullscreen) {
 						closeFullscreen()
 					} else {
@@ -548,26 +540,16 @@
 					}
 				},
 				orbitals: function () {
-					let maxIndex = 0
-					for (let orbital of this.orbitals) {
-						let tmp = mathModel(orbital.n, orbital.type)
-						if (tmp > maxIndex) {
-							maxIndex = tmp
-						}
-					}
-					this.mS = (new Array(maxIndex + 1)).fill(0)
+					this.mS = (new Array(this.orbitals.length)).fill(0)
 				},
 				mS: function () {
-					if (this.opened !== null) {
-						let openedIndex = this.getPrincipleIndex(this.opened)
-						if (typeof this.visualizations[openedIndex] !== 'undefined') {
-							let element = this.visualizations[openedIndex].renderEl
-							element.querySelector('canvas').remove()
-							let orbital = this.displayOrbitals[this.opened]
-							element.style.zIndex = 'auto'
-							element.classList.add('invisible')
-							this.changeVisualization(element, openedIndex, orbital.n, orbital.type, this.mS[openedIndex], 0.1, 0.2)
-						}
+					if (typeof this.visualizations[this.opened] !== 'undefined') {
+						let element = this.visualizations[this.opened].renderEl
+						element.querySelector('canvas').remove()
+						let orbital = this.orbitals[this.opened]
+						element.style.zIndex = 'auto'
+						element.classList.add('invisible')
+						this.changeVisualization(element, openedIndex, orbital.n, orbital.type, this.mS[openedIndex], 0.1, 0.2)
 					}
 				},
 			},
@@ -587,11 +569,10 @@
 			}
 		})
 		window.addEventListener('fullscreenchange', function () {
-			let openedIndex = app.getPrincipleIndex(app.opened)
 			if (document.fullscreenElement === null) {
-				app.visualizations[openedIndex].isFullscreen = false
+				app.visualizations[app.opened].isFullscreen = false
 			}
-			app.visualizations[openedIndex].onWindowResize()
+			app.visualizations[app.opened].onWindowResize()
 		})
 	</script>
 {/block}

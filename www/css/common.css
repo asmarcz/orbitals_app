@@ -1,3 +1,50 @@
+html {
+	height: 100%;
+}
+
+body {
+	font-family: Ubuntu, sans-serif;
+	background: url("assets/points.svg") #20012D;
+	background-size: 40%;
+	color: #fff;
+}
+
+hr {
+	height: 0;
+	border-top: 5px dashed #9400a5;
+}
+
+#navbar a {
+	color: #fff;
+	font-size: 2.5rem;
+	display: inline-block;
+	margin: 0 0.2em;
+}
+
+#navbar a:hover, .active {
+	text-decoration: none;
+	border-top: 3px solid #fff;
+	border-bottom: 3px solid #fff;
+}
+
+.content {
+	font-size: 2rem;
+}
+
+[v-cloak] {
+	display: none;
+}
+
+.verticalHorizontalAlign {
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	-moz-transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+	-o-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+
 #calc-form *:focus {
 	outline: none;
 }

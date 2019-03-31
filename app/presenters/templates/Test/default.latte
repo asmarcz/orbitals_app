@@ -33,7 +33,7 @@
 					Fill in the short configuration:
 				</div>
 				<div class="col-12 col-md-10 col-lg-7 mt-2">
-					<input v-model="inputData" id="check-input" type="text" class="w-100 p-1" placeholder="4s2, 4p3, ...">
+					<input v-model="inputData" id="check-input" type="text" class="w-100 p-1" placeholder="4s2, 4p3, ..." autocomplete="off">
 				</div>
 			</div>
 			<div class="row justify-content-center">
@@ -42,7 +42,7 @@
 				</div>
 			</div>
 		</form>
-		<div v-if="protonNumber" class="row text-center">
+		<div v-if="protonNumber" v-cloak class="row text-center">
 			<div v-if="isCorrect" class="col-12">
 				You are correct!
 			</div>
@@ -54,65 +54,5 @@
 {/block}
 
 {block script}
-	<script>
-		var app = new Vue({
-			el: '#app',
-			data() {
-				return {
-					inputNumber: '',
-					protonNumber: 0,
-					inputData: '',
-					isCorrect: true,
-				}
-			},
-			computed: {
-				orbitals: function () {
-					let element = new Element(this.protonNumber)
-					let mainQuantum = new QuantumLayer(1)
-					let controller = new Controller(element, mainQuantum, exceptions)
-					controller.initiate()
-					controller.checkExceptions()
-					return element.orbitals.filter(orbital => orbital.electronNumber > 0)
-				},
-				shortOrbitals: function () {
-					let lastNobleGas
-					for (let i = nobleGases.length - 1; i >= 0; i--) {
-						if (nobleGases[i] < this.protonNumber) {
-							lastNobleGas = nobleGases[i]
-						}
-					}
-					let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 0 : layers.findIndex(array => array.includes(this.protonNumber)))
-					return this.orbitals.filter(function (orbital) {
-						if (orbital.n === seekedLayer && (orbital.type === 0 || orbital.type === 1)) {
-							return true
-						} else if (orbital.n === seekedLayer - 1 && orbital.type === 2) {
-							return true
-						} else if (orbital.n === seekedLayer - 2 && orbital.type === 3) {
-							return true
-						} else {
-							return false
-						}
-					})
-				},
-			},
-			methods: {
-				check: function () {
-					if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
-						alert(`Proton number must be bigger than 0 and smaller than ${ maxProtonNumber + 1 }.`)
-					} else if (this.inputNumber !== Math.floor(this.inputNumber)) {
-						alert('Proton number must be an integer not a float.')
-					} else {
-						this.protonNumber = this.inputNumber
-						this.isCorrect = true
-						let temp = this.inputData.replace(/\s/g,'').split(',')
-						for (let i = 0; i < temp.length; i++) {
-							if (temp[i][0] != this.shortOrbitals[i].n || temp[i][1] != getOrbitalTypeText(this.shortOrbitals[i].type) || temp[i][2] != this.shortOrbitals[i].electronNumber) {
-								this.isCorrect = false
-							}
-						}
-					}
-				}
-			}
-		})
-	</script>
+	<script src="{$basePath}/js/testpage.js"></script>
 {/block}

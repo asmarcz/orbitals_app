@@ -74,10 +74,6 @@
 <div class="container mt-4 content">
 	{include content}
 </div>
-<script src="{$basePath}/js/model.js"></script>
-<script src="{$basePath}/js/schrodinger.js"></script>
-<script src="{$basePath}/js/three.min.js"></script>
-<script src="{$basePath}/js/OrbitControls.js"></script>
 <script>
 	let exceptions = {$exceptions};
 	let elements = {$elements};
@@ -86,10 +82,10 @@
 	let nobleGases = {$nobleGases};
 	let maxProtonNumber = elements[elements.length - 1][0]
 
-	function sortElements() {
-		elements.sort((first, second) => first[1].localeCompare(second[1]))
-	}
+	let basePath = {$basePath}
 </script>
+<script src="{$basePath}/js/common.js"></script>
+<script src="{$basePath}/js/model.js"></script>
 {ifset #script}
 	{include script}
 {/ifset}

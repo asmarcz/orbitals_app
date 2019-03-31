@@ -19,12 +19,14 @@ hr {
 	font-size: 2.5rem;
 	display: inline-block;
 	margin: 0 0.2em;
+	border-top: 3px solid transparent;
+	border-bottom: 3px solid transparent;
+	transition: 300ms;
 }
 
-#navbar a:hover, .active {
+#navbar a:hover, #navbar .active {
 	text-decoration: none;
-	border-top: 3px solid #fff;
-	border-bottom: 3px solid #fff;
+	border-color: #fff;
 }
 
 .content {

@@ -197,7 +197,7 @@ vueParams.watch = {
 			let orbital = this.orbitals[this.opened]
 			element.style.zIndex = 'auto'
 			element.classList.add('invisible')
-			this.changeVisualization(element, openedIndex, orbital.n, orbital.type, this.mS[openedIndex], 0.1, 0.2)
+			this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
 		}
 	},
 }

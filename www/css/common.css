@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Ubuntu, sans-serif;
-	background: url("assets/points.svg") #20012D;
+	background: url("../assets/points.svg") #20012D;
 	background-size: 40%;
 	color: #fff;
 }

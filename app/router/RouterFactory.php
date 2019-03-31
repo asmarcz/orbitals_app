@@ -19,6 +19,7 @@ final class RouterFactory
 		$router = new RouteList;
 		$router[] = new Route('', 'Homepage:default');
 		$router[] = new Route('test', 'Test:default');
+		$router[] = new Route('about', 'About:default');
 		return $router;
 	}
 }

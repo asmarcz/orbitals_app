@@ -87,6 +87,16 @@ Object.assign(vueParams.computed, {
 	nobleGasIndex: function () {
 		return elements.findIndex(el => el[0] === this.nobleGasNumber)
 	},
+	layerElectrons: function () {
+		let tmp = []
+		this.orbitals.forEach(function (orbital) {
+			if (typeof tmp[orbital.n - 1] === 'undefined') {
+				tmp[orbital.n - 1] = 0
+			}
+			tmp[orbital.n - 1] += orbital.electronNumber
+		})
+		return tmp
+	},
 })
 
 vueParams.methods = {
@@ -199,6 +209,37 @@ vueParams.watch = {
 			element.classList.add('invisible')
 			this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
 		}
+	},
+	layerElectrons: function () {
+		this.$nextTick(() => {
+			let svg = this.$refs['bohr-model']
+			let layer = svg.querySelector('#layer')
+			let electron = svg.querySelector('#electron')
+
+			let halfSpaceNeeded = 20 + (this.layerElectrons.length - 1) * 10 + 10
+			let spaceNeeded = halfSpaceNeeded * 2
+			svg.viewBox.baseVal.width = spaceNeeded
+			svg.viewBox.baseVal.height = spaceNeeded
+
+			this.layerElectrons.forEach(function (n, i) {
+				let newLayer = layer.cloneNode()
+				let radius = 20 + i * 10
+				newLayer.setAttribute('r', radius)
+				svg.appendChild(newLayer)
+
+				let randomOffset = Math.floor(Math.random() * 1000)
+				let rotateOffset = 360 / n
+				for (let j = 0; j < n; j++) {
+					let newElectron = electron.cloneNode(true)
+					let animate = newElectron.children[0]
+					newElectron.setAttribute('cy', halfSpaceNeeded - radius)
+					animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+					animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+					animate.setAttribute('dur', `${15 + 15 * i}`)
+					svg.appendChild(newElectron)
+				}
+			})
+		})
 	},
 }
 

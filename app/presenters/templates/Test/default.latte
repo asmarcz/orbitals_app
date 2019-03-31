@@ -7,6 +7,14 @@
 			color: #fff;
 			text-indent: 0.5em;
 		}
+
+		.correct {
+			background-color: green;
+		}
+
+		.incorrect {
+			background-color: #dc3500;
+		}
 	</style>
 {/block}
 
@@ -42,12 +50,20 @@
 				</div>
 			</div>
 		</form>
-		<div v-if="protonNumber" v-cloak class="row text-center">
-			<div v-if="isCorrect" class="col-12">
-				You are correct!
-			</div>
-			<div v-else class="col-12">
-				You are incorrect!
+		<div v-if="protonNumber" v-cloak class="text-center">
+			<div class="row justify-content-center">
+				<div class="col-12 col-md-10 col-lg-7 mt-2">
+					<div v-if="isCorrect" class="correct">
+						{{ lastData }} is correct!<br>
+						<template v-if="removeSpaces(correctSyntax) !== this.inputDataStripped">
+							Try this order next time&nbsp;😉&nbsp;:<br>
+							{{ correctSyntax }}
+						</template>
+					</div>
+					<div v-else class="incorrect">
+						{{ lastData }} is not incorrect! 😕
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

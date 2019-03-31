@@ -1,41 +1,59 @@
-vueParams.data = () => { return {
-	inputNumber: '',
-	protonNumber: 0,
-	inputData: '',
-	isCorrect: true,
-}
+vueParams.data = () => {
+	return {
+		inputNumber: '',
+		protonNumber: 0,
+		inputData: '',
+		isCorrect: true,
+		correctSyntax: '',
+		inputDataStripped: '',
+		lastData: '',
+	}
 }
 
 vueParams.methods = {
 	check: function () {
 		if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
-			alert(`Proton number must be bigger than 0 and smaller than ${ maxProtonNumber + 1 }.`)
+			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
 		} else if (this.inputNumber !== Math.floor(this.inputNumber)) {
 			alert('Proton number must be an integer not a float.')
+		} else if (this.inputData.trim() === '') {
+			alert('Configuration must not be empty.')
 		} else {
 			this.protonNumber = this.inputNumber
+			this.lastData = this.inputData
 			this.isCorrect = true
-			let temp = this.inputData.replace(/\s/g,'')
+			let temp = this.removeSpaces(this.inputData)
 				.replace(/^,+|,+$/g, '')
 			if (temp.match(/[^0-9a-zA-Z,]/g) !== null) {
 				this.isCorrect = false
 			} else {
+				this.inputDataStripped = temp
 				temp = temp.split(',')
-				for (let i = 0; i < temp.length; i++) {
-					let matches = /([0-9]+)([a-zA-Z])([0-9]+)/g.exec(temp[i])
-					if (matches !== null && matches[0] === temp[i]) {
-						let orbital = this.orbitals[this.shortOrbitalsIndexes[i]]
-						if (typeof orbital !== 'undefined') {
-							if (parseInt(matches[1]) === orbital.n && matches[2] === getOrbitalTypeText(orbital.type) && parseInt(matches[3]) === orbital.electronNumber) {
-								continue
-							}
+				let correctOrbitals = this.shortOrbitalsIndexes.map(e => {
+					let orbital = this.orbitals[e]
+					return orbital.n + getOrbitalTypeText(orbital.type) + orbital.electronNumber
+				})
+				this.correctSyntax = correctOrbitals.join(', ')
+
+				if (correctOrbitals.length === temp.length) {
+					for (let i = 0; i < temp.length; i++) {
+						let index = correctOrbitals.findIndex(e => e === temp[i])
+						if (index === -1) {
+							this.isCorrect = false
+							break
+						} else {
+							correctOrbitals[index] = undefined
 						}
 					}
+				} else {
 					this.isCorrect = false
 				}
 			}
 		}
-	}
+	},
+	removeSpaces: function (string) {
+		return string.replace(/\s/g, '')
+	},
 }
 
 var app = new Vue(vueParams)

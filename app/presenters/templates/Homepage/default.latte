@@ -96,6 +96,22 @@
 {/block}
 
 {block content}
+	<script id="bohr-model-template" type="text/x-template">
+		<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			<defs>
+				<circle id="layer" cx="50%" cy="50%" stroke="orange" stroke-width="2" fill="transparent"/>
+				<circle id="electron" r="4" cx="50%" fill="green">
+					<animateTransform attributeName="transform" attributeType="XML" type="rotate" repeatCount="indefinite"/>
+				</circle>
+			</defs>
+			<circle r="10" cx="50%" cy="50%" fill="red"/>
+		</svg>
+	</script>
+	<script id="bohr-model" type="text/x-template">
+		<div class="atom col-12 col-lg-5">
+			<img :src="url" alt="Bohr atom model" class="mx-auto h-100 d-block">
+		</div>
+	</script>
 	<div id="app">
 		<form id="calc-form" @submit.prevent="calculate">
 			<div class="row justify-content-center">
@@ -130,17 +146,7 @@
 				<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
 				{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}
 			</div>
-			<div class="col-12 col-lg-5">
-				<svg :key="protonNumber + '-svg'" ref="bohr-model" viewBox="0 0 200 200" class="atom" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-					<defs>
-						<circle id="layer" cx="50%" cy="50%" stroke="orange" stroke-width="2" fill="transparent"/>
-						<circle id="electron" r="4" cx="50%" fill="green">
-							<animateTransform attributeName="transform" attributeType="XML" type="rotate" repeatCount="indefinite"/>
-						</circle>
-					</defs>
-					<circle r="10" cx="50%" cy="50%" fill="red"/>
-				</svg>
-			</div>
+			<bohr-model :layer-electrons="layerElectrons"></bohr-model>
 			<div class="col-12 col-lg-7">
 				<table id="orbitals-table" class="w-100 text-center">
 					<thead>

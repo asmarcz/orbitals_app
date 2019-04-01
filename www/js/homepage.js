@@ -210,36 +210,62 @@ vueParams.watch = {
 			this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
 		}
 	},
-	layerElectrons: function () {
-		this.$nextTick(() => {
-			let svg = this.$refs['bohr-model']
-			let layer = svg.querySelector('#layer')
-			let electron = svg.querySelector('#electron')
+}
 
-			let halfSpaceNeeded = 20 + (this.layerElectrons.length - 1) * 10 + 10
-			let spaceNeeded = halfSpaceNeeded * 2
-			svg.viewBox.baseVal.width = spaceNeeded
-			svg.viewBox.baseVal.height = spaceNeeded
+let bohrModelTemplate = document.getElementById('bohr-model-template')
+	.innerHTML
+	.trim()
 
-			this.layerElectrons.forEach(function (n, i) {
-				let newLayer = layer.cloneNode()
-				let radius = 20 + i * 10
-				newLayer.setAttribute('r', radius)
-				svg.appendChild(newLayer)
+vueParams.components = {
+	'bohr-model': {
+		template: '#bohr-model',
+		props: ['layer-electrons'],
+		data() {
+			return {
+				url: '',
+			}
+		},
+		watch: {
+			layerElectrons: {
+				immediate: true,
+				handler() {
+					let template = document.createElement('template')
+					template.innerHTML = bohrModelTemplate
+					let svg = template.content.firstChild
+					let layer = svg.querySelector('#layer')
+					let electron = svg.querySelector('#electron')
 
-				let randomOffset = Math.floor(Math.random() * 1000)
-				let rotateOffset = 360 / n
-				for (let j = 0; j < n; j++) {
-					let newElectron = electron.cloneNode(true)
-					let animate = newElectron.children[0]
-					newElectron.setAttribute('cy', halfSpaceNeeded - radius)
-					animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
-					animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
-					animate.setAttribute('dur', `${15 + 15 * i}`)
-					svg.appendChild(newElectron)
-				}
-			})
-		})
+					let halfSpaceNeeded = 20 + (this.layerElectrons.length - 1) * 10 + 10
+					let spaceNeeded = halfSpaceNeeded * 2
+					svg.viewBox.baseVal.width = spaceNeeded
+					svg.viewBox.baseVal.height = spaceNeeded
+
+					this.layerElectrons.forEach(function (n, i) {
+						let newLayer = layer.cloneNode()
+						let radius = 20 + i * 10
+						newLayer.setAttribute('r', radius)
+						svg.appendChild(newLayer)
+
+						let rotateOffset = 360 / n
+						for (let j = 0; j < n; j++) {
+							let newElectron = electron.cloneNode(true)
+							let animate = newElectron.children[0]
+							newElectron.setAttribute('cy', halfSpaceNeeded - radius)
+							animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+							animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+							animate.setAttribute('dur', `${15 + 15 * i}`)
+							svg.appendChild(newElectron)
+						}
+					})
+
+					let blob = new Blob([template.innerHTML], {type: 'image/svg+xml'})
+					let url = URL.createObjectURL(blob)
+					URL.revokeObjectURL(this.url)
+
+					this.url = url
+				},
+			},
+		},
 	},
 }
 

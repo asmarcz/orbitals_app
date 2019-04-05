@@ -253,7 +253,7 @@ vueParams.components = {
 							newElectron.setAttribute('cy', halfSpaceNeeded - radius)
 							animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
 							animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
-							animate.setAttribute('dur', `${15 + 15 * i}`)
+							animate.setAttribute('dur', 15 + 15 * i)
 							svg.appendChild(newElectron)
 						}
 					})
@@ -276,11 +276,9 @@ window.addEventListener('popstate', function () {
 })
 window.addEventListener('click', function () {
 	if (keysFlag) {
-		for (let visualization of app.visualizations) {
-			if (typeof visualization !== 'undefined') {
-				visualization.controls.enableKeys = false
-			}
-		}
+		app.visualizations.forEach(function (visualization) {
+			visualization.controls.enableKeys = false
+		})
 		keysFlag = false
 	}
 })

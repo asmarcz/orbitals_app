@@ -89,11 +89,20 @@ Object.assign(vueParams.computed, {
 	},
 	layerElectrons: function () {
 		let tmp = []
-		this.orbitals.forEach(function (orbital) {
-			if (typeof tmp[orbital.n - 1] === 'undefined') {
-				tmp[orbital.n - 1] = 0
+		tmp.valences = []
+		this.orbitals.forEach((orbital, index) => {
+			let i = orbital.n - 1
+			if (typeof tmp[i] === 'undefined') {
+				tmp[i] = 0
 			}
-			tmp[orbital.n - 1] += orbital.electronNumber
+			tmp[i] += orbital.electronNumber
+
+			if (this.valenceIndexes.includes(index)) {
+				if (typeof tmp.valences[i] === 'undefined') {
+					tmp.valences[i] = 0
+				}
+				tmp.valences[i] += orbital.electronNumber
+			}
 		})
 		return tmp
 	},
@@ -240,11 +249,13 @@ vueParams.components = {
 					svg.viewBox.baseVal.width = spaceNeeded
 					svg.viewBox.baseVal.height = spaceNeeded
 
-					this.layerElectrons.forEach(function (n, i) {
+					this.layerElectrons.forEach((n, i) => {
 						let newLayer = layer.cloneNode()
 						let radius = 20 + i * 10
 						newLayer.setAttribute('r', radius)
 						svg.appendChild(newLayer)
+
+						let distribution = Math.floor(n / this.layerElectrons.valences[i])
 
 						let rotateOffset = 360 / n
 						for (let j = 0; j < n; j++) {
@@ -254,6 +265,11 @@ vueParams.components = {
 							animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
 							animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
 							animate.setAttribute('dur', 15 + 15 * i)
+
+							if (!isNaN(distribution) && (j + 1) % distribution === 0) {
+								newElectron.setAttribute('fill', 'darkorchid')
+							}
+
 							svg.appendChild(newElectron)
 						}
 					})

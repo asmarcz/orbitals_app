@@ -175,9 +175,7 @@ vueParams.methods = {
 		this.$set(this.visualizations, index, visualization)
 	},
 	enableKeys: function (index) {
-		if (true) {
-			this.visualizations[index].controls.enableKeys = true
-		}
+		this.visualizations[index].controls.enableKeys = true
 	},
 	getRowIconAddress: function (show) {
 		return basePath + '/assets/' + (show ? 'plus' : 'hide') + '.svg'

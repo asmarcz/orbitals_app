@@ -1,0 +1,15 @@
+#check-input {
+	background-color: #282828;
+	border-radius: 10px;
+	border: 4px solid rgb(107, 110, 115);
+	color: #fff;
+	text-indent: 0.5em;
+}
+
+.correct {
+	background-color: green;
+}
+
+.incorrect {
+	background-color: #dc3500;
+}

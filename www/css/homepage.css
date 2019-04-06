@@ -1,0 +1,104 @@
+@-moz-document url-prefix() {
+	#calc-select {
+		text-indent: 0.25em;
+	}
+}
+
+#calc-checkbox-wrapper {
+	background-color: #282828;
+	border: 4px solid rgb(107, 110, 115);
+}
+
+#calc-checkbox {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 1.5em;
+	height: 1.5em;
+	border: 4px solid rgb(107, 110, 115);
+	border-radius: 9px;
+	background-color: #282828;
+}
+
+#calc-checkbox:checked {
+	background-color: rgb(91, 51, 120);
+}
+
+#orbitals-table tr:nth-of-type(2n+1) td, #orbitals-table th {
+	border: 5px solid;
+	border-image: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(134, 134, 134, 1) 50%, rgba(0, 0, 0, 1) 100%) 35%;
+}
+
+.valence {
+	background-color: rgb(91, 51, 120);
+}
+
+.canvas {
+	border-radius: 10px;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.arrow-wrap {
+	height: calc(1.5em + 12px);
+	padding: 3px;
+}
+
+.canvas:hover, #orbitals-table tbody tr:nth-of-type(2n+1):hover {
+	cursor: pointer;
+}
+
+#orbitals-table tbody tr:nth-of-type(2n+1):hover {
+	-webkit-box-shadow: 0 0 25px 5px #ddd;
+	-moz-box-shadow: 0 0 25px 5px #ddd;
+	box-shadow: 0 0 25px 5px #ddd;
+}
+
+.renderer {
+	top: 0;
+	left: 0;
+}
+
+.hide-icon {
+	transform: rotate(180deg);
+}
+
+.btn-fullscreen {
+	right: 0.5em;
+	bottom: 0.5em;
+	height: 40px;
+}
+
+.m-toolbar {
+	background-color: #707070;
+	border-radius: 10px;
+}
+
+.m-toolbar label {
+	background-color: #252525;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.m-toolbar input[type="radio"]:checked + label {
+	background-color: #fff;
+	border: 4px solid #252525;
+	color: #252525;
+}
+
+@media screen and (min-width: 768px) {
+	.atom {
+		max-height: 35vh;
+	}
+}
+
+@media screen and (min-width: 992px) {
+	.atom {
+		max-height: 45vh;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.atom {
+		max-height: none;
+	}
+}

@@ -1,5 +1,9 @@
 {block title}Test{/block}
 
+{block style}
+	<link rel="stylesheet" href="{$basePath}/css/testpage.css">
+{/block}
+
 {block content}
 	<div id="app">
 		<form id="calc-form" @submit.prevent="check">

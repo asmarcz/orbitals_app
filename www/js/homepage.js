@@ -143,10 +143,16 @@ vueParams.methods = {
 
 				let bottom = el.getBoundingClientRect().bottom
 				if (bottom > window.innerHeight) {
+					let y = document.scrollingElement.scrollTop + bottom - window.innerHeight
 					window.scrollTo({
-						top: document.documentElement.scrollTop + bottom - window.innerHeight,
+						top: y,
 						behavior: 'smooth'
 					})
+
+					// fix for unsupported scrollToOptions
+					if (document.documentElement.scrollTop === 0) {
+						window.scrollTo(0, y)
+					}
 				}
 			})
 		}

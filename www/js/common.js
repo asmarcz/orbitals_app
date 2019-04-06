@@ -38,3 +38,6 @@ let vueParams = {
 		},
 	}
 }
+
+// Modernizr
+let isSMILAvailable = /SVGAnimate/.test((document.createElementNS('http://www.w3.org/2000/svg', 'animate')).toString())

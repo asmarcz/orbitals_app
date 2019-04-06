@@ -261,14 +261,21 @@ vueParams.components = {
 
 						let distribution = Math.floor(n / this.layerElectrons.valences[i])
 
-						let rotateOffset = 360 / n
+						let rotateOffset = 2 * Math.PI / n
 						for (let j = 0; j < n; j++) {
 							let newElectron = electron.cloneNode(true)
+							let currentOffset = j * rotateOffset
+							newElectron.setAttribute('cx', halfSpaceNeeded - radius * Math.cos(currentOffset))
+							newElectron.setAttribute('cy', halfSpaceNeeded - radius * Math.sin(currentOffset))
+
+							let duration = 15 + 15 * i
 							let animate = newElectron.children[0]
-							newElectron.setAttribute('cy', halfSpaceNeeded - radius)
-							animate.setAttribute('from', `${j * rotateOffset} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
-							animate.setAttribute('to', `${j * rotateOffset + 360} ${halfSpaceNeeded} ${halfSpaceNeeded}`)
-							animate.setAttribute('dur', 15 + 15 * i)
+							animate.setAttribute('from', `0 ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+							animate.setAttribute('to', `360 ${halfSpaceNeeded} ${halfSpaceNeeded}`)
+							animate.setAttribute('dur', duration)
+							if (!isSMILAvailable) {
+								newElectron.style.animation = `electron ${duration}s linear infinite`
+							}
 
 							if (!isNaN(distribution) && (j + 1) % distribution === 0) {
 								newElectron.setAttribute('fill', 'darkorchid')

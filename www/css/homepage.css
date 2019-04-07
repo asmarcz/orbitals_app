@@ -86,19 +86,19 @@
 }
 
 @media screen and (min-width: 768px) {
-	.atom {
+	.atom img {
 		max-height: 35vh;
 	}
 }
 
 @media screen and (min-width: 992px) {
-	.atom {
+	.atom img {
 		max-height: 45vh;
 	}
 }
 
 @media screen and (min-width: 1200px) {
-	.atom {
+	.atom img {
 		max-height: none;
 	}
 }

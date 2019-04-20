@@ -208,6 +208,9 @@ vueParams.watch = {
 		let afterHash = parseInt(this.hash.substring(1))
 		if (afterHash > 0 && afterHash <= maxProtonNumber) {
 			this.protonNumber = this.inputNumber = afterHash
+		} else if (this.hash === '' || this.hash === '#') {
+			this.inputNumber = ''
+			this.protonNumber = 0
 		}
 	},
 	orbitals: function () {
@@ -298,7 +301,7 @@ vueParams.components = {
 
 var app = new Vue(vueParams)
 
-window.addEventListener('popstate', function () {
+window.addEventListener('hashchange', function () {
 	app.hash = window.location.hash
 })
 window.addEventListener('click', function () {

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "dg/adminer-custom",
-            "version": "v1.17.0",
+            "version": "v1.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dg/adminer-custom.git",
-                "reference": "cdd53328cc6ec81b0b406d2f394d9bd0fbc10b48"
+                "reference": "5a0e173d0dcb9cbaa0f03aeee12036cee80a5bed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dg/adminer-custom/zipball/cdd53328cc6ec81b0b406d2f394d9bd0fbc10b48",
-                "reference": "cdd53328cc6ec81b0b406d2f394d9bd0fbc10b48",
+                "url": "https://api.github.com/repos/dg/adminer-custom/zipball/5a0e173d0dcb9cbaa0f03aeee12036cee80a5bed",
+                "reference": "5a0e173d0dcb9cbaa0f03aeee12036cee80a5bed",
                 "shasum": ""
             },
             "type": "library",
@@ -33,7 +33,7 @@
                 "postgresql",
                 "sqlite"
             ],
-            "time": "2019-01-26T14:52:00+00:00"
+            "time": "2019-04-16T20:25:42+00:00"
         },
         {
             "name": "latte/latte",

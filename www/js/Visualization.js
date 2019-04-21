@@ -75,10 +75,6 @@ class Visualization {
 		this.renderer.setSize(this.renderEl.clientWidth, this.renderEl.clientHeight, false)
 		this.renderEl.appendChild(this.renderer.domElement)
 		this.renderer.domElement.classList.add('w-100', 'h-100')
-		this.camera = new THREE.PerspectiveCamera(40, this.renderEl.clientWidth / this.renderEl.clientHeight, 1, 1000)
-		this.camera.position.set(15, 20, 30)
-		this.scene.add(this.camera)
-		this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
 		this.scene.add(new THREE.AxesHelper(20))
 
 		window.addEventListener('resize', () => {
@@ -107,6 +103,22 @@ class Visualization {
 		let points = new THREE.Points(geometry, material)
 
 		this.scene.add(points)
+
+		let boundingBox = new THREE.Box3()
+		boundingBox.setFromObject(points)
+		let size = new THREE.Vector3()
+		boundingBox.getSize(size)
+
+		let FOV = 40
+
+		let maxDimension = Math.max(size.x, size.y, size.z)
+		let x = maxDimension / 2 / Math.tan(FOV * (Math.PI / 180) / 2) + maxDimension / 2
+
+		this.camera = new THREE.PerspectiveCamera(FOV, this.renderEl.clientWidth / this.renderEl.clientHeight, 1, 1000)
+		this.camera.position.set(x, 0, 0)
+		this.scene.add(this.camera)
+
+		this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
 	}
 
 	onWindowResize() {

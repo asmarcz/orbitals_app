@@ -42,6 +42,16 @@ function isFullscreenAvailable() {
 	}
 }
 
+// use instead of $nextTick to force browser to repaint and show user wait message
+// Google search: double requestAnimationFrame
+function doubleAnimationFrame(callable) {
+	requestAnimationFrame(function () {
+		requestAnimationFrame(function () {
+			callable()
+		})
+	})
+}
+
 let keysFlag = false
 
 vueParams.data = function () {
@@ -166,12 +176,8 @@ vueParams.methods = {
 			let visualizationElement = ev.currentTarget.children[0]
 			let orbital = this.orbitals[index]
 
-			// use instead of $nextTick to force browser to repaint and show user wait message
-			// Google search: double requestAnimationFrame
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					this.changeVisualization(visualizationElement, index, orbital.n, orbital.type, this.mS[index], 0.1, 0.2)
-				})
+			doubleAnimationFrame(() => {
+				this.changeVisualization(visualizationElement, index, orbital.n, orbital.type, this.mS[index], 0.1, 0.2)
 			})
 		}
 	},
@@ -226,10 +232,8 @@ vueParams.watch = {
 			element.style.zIndex = 'auto'
 			element.classList.add('invisible')
 
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
-				})
+			doubleAnimationFrame(() => {
+				this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
 			})
 		}
 	},

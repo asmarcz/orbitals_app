@@ -110,11 +110,11 @@ Object.assign(vueParams.computed, {
 
 vueParams.methods = {
 	calculate: function () {
-		if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
+		if (!isInProtonNumberRange(this.inputNumber)) {
 			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
-		} else if (this.inputNumber !== Math.floor(this.inputNumber)) {
+		} else if (!isWholeNumber(this.inputNumber)) {
 			alert('Proton number must be an integer not a float.')
-		} else {
+		} else if (isValidProtonNumber(this.inputNumber)) {
 			this.protonNumber = this.inputNumber
 			this.electronNumber = this.inputNumber
 			window.location.hash = '#' + this.protonNumber
@@ -205,8 +205,8 @@ vueParams.beforeMount = function () {
 
 vueParams.watch = {
 	hash: function () {
-		let afterHash = parseInt(this.hash.substring(1))
-		if (afterHash > 0 && afterHash <= maxProtonNumber) {
+		let afterHash = parseFloat(this.hash.substring(1))
+		if (isValidProtonNumber(afterHash)) {
 			this.protonNumber = this.inputNumber = afterHash
 		} else if (this.hash === '' || this.hash === '#') {
 			this.inputNumber = ''

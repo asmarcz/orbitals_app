@@ -12,13 +12,13 @@ vueParams.data = () => {
 
 vueParams.methods = {
 	check: function () {
-		if (this.inputNumber < 1 || this.inputNumber > maxProtonNumber) {
+		if (!isInProtonNumberRange(this.inputNumber)) {
 			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
-		} else if (this.inputNumber !== Math.floor(this.inputNumber)) {
+		} else if (!isWholeNumber(this.inputNumber)) {
 			alert('Proton number must be an integer not a float.')
 		} else if (this.inputData.trim() === '') {
 			alert('Configuration must not be empty.')
-		} else {
+		} else if (isValidProtonNumber(this.inputNumber)) {
 			this.protonNumber = this.inputNumber
 			this.lastData = this.inputData
 			this.isCorrect = true

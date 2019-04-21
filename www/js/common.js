@@ -41,3 +41,15 @@ let vueParams = {
 
 // Modernizr
 let isSMILAvailable = /SVGAnimate/.test((document.createElementNS('http://www.w3.org/2000/svg', 'animate')).toString())
+
+function isInProtonNumberRange(n) {
+	return n > 0 && n <= maxProtonNumber
+}
+
+function isWholeNumber(n) {
+	return n === Math.floor(n)
+}
+
+function isValidProtonNumber(n) {
+	return isInProtonNumberRange(n) && isWholeNumber(n)
+}

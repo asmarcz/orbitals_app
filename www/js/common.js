@@ -1,3 +1,21 @@
+let isTouch
+window.addEventListener('touchstart', function _saveTouch() {
+	isTouch = true
+	window.removeEventListener('touchstart', _saveTouch)
+})
+window.addEventListener('click', function _wasTouched() {
+	if (typeof isTouch === 'undefined') {
+		isTouch = false
+	}
+	window.removeEventListener('click', _wasTouched)
+})
+
+function hideKeyboard() {
+	if (isTouch && document.activeElement.tagName === 'INPUT') {
+		document.activeElement.blur()
+	}
+}
+
 function sortElements() {
 	elements.sort((first, second) => first[1].localeCompare(second[1]))
 }

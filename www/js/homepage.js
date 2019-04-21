@@ -119,6 +119,8 @@ vueParams.methods = {
 			this.electronNumber = this.inputNumber
 			window.location.hash = '#' + this.protonNumber
 			this.showShort = this.inputShort
+
+			hideKeyboard()
 		}
 	},
 	toggleOpen: function (index, ev) {

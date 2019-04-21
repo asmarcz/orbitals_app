@@ -49,6 +49,8 @@ vueParams.methods = {
 					this.isCorrect = false
 				}
 			}
+
+			hideKeyboard()
 		}
 	},
 	removeSpaces: function (string) {

@@ -173,7 +173,7 @@ vueParams.methods = {
 		keysFlag = true
 		if (!this.models.includes(index) && this.isWebGLAvailable) {
 			this.models.push(index)
-			let visualizationElement = ev.currentTarget.children[0]
+			let visualizationElement = ev.currentTarget.querySelector('.renderer')
 			let orbital = this.orbitals[index]
 
 			doubleAnimationFrame(() => {
@@ -184,12 +184,12 @@ vueParams.methods = {
 	changeVisualization: function (element, index, n, l, m, step, radius) {
 		let visualization = new Visualization(element)
 		visualization.init(n, l, m, step, radius)
-		element.style.zIndex = '1'
-		element.classList.remove('invisible')
 		this.$set(this.visualizations, index, visualization)
 	},
 	enableKeys: function (index) {
-		this.visualizations[index].controls.enableKeys = true
+		if (typeof this.visualizations[index] !== 'undefined') {
+			this.visualizations[index].controls.enableKeys = true
+		}
 	},
 	getRowIconAddress: function (show) {
 		return basePath + '/assets/' + (show ? 'plus' : 'hide') + '.svg'
@@ -229,8 +229,6 @@ vueParams.watch = {
 			let element = this.visualizations[this.opened].renderEl
 			element.querySelector('canvas').remove()
 			let orbital = this.orbitals[this.opened]
-			element.style.zIndex = 'auto'
-			element.classList.add('invisible')
 
 			doubleAnimationFrame(() => {
 				this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)

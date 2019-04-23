@@ -105,10 +105,6 @@
 									</template>
 								</form>
 								<div @click.stop="addModel(index, $event)" class="canvas row overflow-hidden position-relative mx-auto mt-2 mb-2 pt-2 pb-2">
-									<div @click="enableKeys(index)" class="renderer invisible position-absolute w-100 h-100">
-										<div class="position-absolute" style="color: #f00;"></div>
-										<img v-if="isFullscreenAvailable" @click="toggleFullscreen(index)" class="btn-fullscreen position-absolute" :src="getFullscreenIconAddress(index)" alt="open or close fullscreen">
-									</div>
 									<template v-if="!models.includes(index) && isWebGLAvailable">
 										<div class="col-6">
 											<svg height="70%" width="80%" class="position-relative verticalHorizontalAlign" viewBox="0 0 91 104" xmlns="http://www.w3.org/2000/svg">
@@ -135,6 +131,10 @@
 											</div>
 										</div>
 									</template>
+									<div @click="enableKeys(index)" class="renderer position-absolute w-100 h-100">
+										<div class="position-absolute" style="color: #f00;"></div>
+										<img v-if="isFullscreenAvailable" @click="toggleFullscreen(index)" class="btn-fullscreen position-absolute" :src="getFullscreenIconAddress(index)" alt="open or close fullscreen">
+									</div>
 								</div>
 							</td>
 						</tr>

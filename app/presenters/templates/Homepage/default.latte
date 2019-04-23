@@ -132,8 +132,8 @@
 										</div>
 									</template>
 									<div @click="enableKeys(index)" class="renderer position-absolute w-100 h-100">
-										<div class="position-absolute" style="color: #f00;"></div>
-										<img v-if="isFullscreenAvailable" @click="toggleFullscreen(index)" class="btn-fullscreen position-absolute" :src="getFullscreenIconAddress(index)" alt="open or close fullscreen">
+										<div class="position-absolute d-none" style="color: #f00;"></div>
+										<img v-if="isFullscreenAvailable" @click="toggleFullscreen(index)" class="btn-fullscreen position-absolute d-none" :src="getFullscreenIconAddress(index)" alt="open or close fullscreen">
 									</div>
 								</div>
 							</td>

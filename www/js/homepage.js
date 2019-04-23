@@ -178,6 +178,7 @@ vueParams.methods = {
 
 			doubleAnimationFrame(() => {
 				this.changeVisualization(visualizationElement, index, orbital.n, orbital.type, this.mS[index], 0.1, 0.2)
+				this.visualizations[index].showControls()
 			})
 		}
 	},
@@ -230,8 +231,10 @@ vueParams.watch = {
 			element.querySelector('canvas').remove()
 			let orbital = this.orbitals[this.opened]
 
+			this.visualizations[this.opened].hideControls()
 			doubleAnimationFrame(() => {
 				this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
+				this.visualizations[this.opened].showControls()
 			})
 		}
 	},

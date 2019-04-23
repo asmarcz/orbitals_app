@@ -1,6 +1,8 @@
 class Visualization {
 	constructor(element) {
 		this.renderEl = element
+		this.fullscreenEl = element.querySelector('img')
+		this.fpsEl = element.querySelector('div')
 		this.frames = 0
 		this.lastTime = -1
 		this.continue = true
@@ -139,5 +141,15 @@ class Visualization {
 		} else if (this.renderEl.msRequestFullscreen) {
 			this.renderEl.msRequestFullscreen()
 		}
+	}
+
+	showControls() {
+		this.fullscreenEl.classList.remove('d-none')
+		this.fpsEl.classList.remove('d-none')
+	}
+
+	hideControls() {
+		this.fullscreenEl.classList.add('d-none')
+		this.fpsEl.classList.add('d-none')
 	}
 }

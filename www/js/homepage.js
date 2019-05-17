@@ -244,6 +244,25 @@ let bohrModelTemplate = document.getElementById('bohr-model-template')
 	.innerHTML
 	.trim()
 
+class CircleSpace {
+	constructor(start, end, circleLength) {
+		if (start >= circleLength || end >= circleLength) {
+			throw new Error('Start and end must be within circle length.')
+		}
+		this.start = start
+		this.end = end
+		this.circleLength = circleLength
+	}
+
+	get length() {
+		if (this.start > this.end) {
+			return this.circleLength - this.start + this.end + 1
+		} else {
+			return this.end - this.start + 1
+		}
+	}
+}
+
 vueParams.components = {
 	'bohr-model': {
 		template: '#bohr-model',
@@ -273,8 +292,9 @@ vueParams.components = {
 						let radius = 20 + i * 10
 						newLayer.setAttribute('r', radius)
 						svg.appendChild(newLayer)
+						let duration = 15 + 15 * i
 
-						let distribution = Math.floor(n / this.layerElectrons.valences[i])
+						let electrons = []
 
 						let rotateOffset = 2 * Math.PI / n
 						for (let j = 0; j < n; j++) {
@@ -283,7 +303,6 @@ vueParams.components = {
 							newElectron.setAttribute('cx', halfSpaceNeeded - radius * Math.cos(currentOffset))
 							newElectron.setAttribute('cy', halfSpaceNeeded - radius * Math.sin(currentOffset))
 
-							let duration = 15 + 15 * i
 							let animate = newElectron.children[0]
 							animate.setAttribute('from', `0 ${halfSpaceNeeded} ${halfSpaceNeeded}`)
 							animate.setAttribute('to', `360 ${halfSpaceNeeded} ${halfSpaceNeeded}`)
@@ -292,11 +311,44 @@ vueParams.components = {
 								newElectron.style.animation = `electron ${duration}s linear infinite`
 							}
 
-							if (!isNaN(distribution) && (j + 1) % distribution === 0) {
-								newElectron.setAttribute('fill', 'darkorchid')
+							electrons.push(newElectron)
+						}
+
+						let valences = this.layerElectrons.valences[i]
+						if (typeof valences !== 'undefined' && valences > 0) {
+							let marked = []
+							let circleLength = electrons.length
+							let biggestSpace = new CircleSpace(0, circleLength - 1, circleLength)
+
+							while (marked.length < valences) {
+								let compareLength = 0
+								for (let k = 0; k < marked.length; k++) {
+									let start = (marked[k] + 1) % circleLength
+									let end = (marked[((k + 1) % marked.length)] + circleLength - 1) % circleLength
+									if (marked.includes(start) || marked.includes(end)) {
+										continue
+									}
+									let space = new CircleSpace(start, end, circleLength)
+									if (space.length > compareLength) {
+										biggestSpace = space
+										compareLength = biggestSpace.length
+									}
+								}
+
+								let toMark = (Math.ceil(biggestSpace.length / 2) + biggestSpace.start + circleLength - 1) % circleLength
+								marked.push(toMark)
+								marked.sort(function (a, b) {
+									return a - b
+								})
 							}
 
-							svg.appendChild(newElectron)
+							marked.forEach(function (index) {
+								electrons[index].setAttribute('fill', 'darkorchid')
+							})
+						}
+
+						for (let e of electrons) {
+							svg.appendChild(e)
 						}
 					})
 

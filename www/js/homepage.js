@@ -342,8 +342,51 @@ vueParams.components = {
 								})
 							}
 
-							marked.forEach(function (index) {
-								electrons[index].setAttribute('fill', 'darkorchid')
+							{
+								let tmp = (new Array(circleLength)).fill(0)
+								marked.forEach(function (index) {
+									tmp[index] = 1
+								})
+								marked = tmp
+							}
+
+							let distributed
+							do {
+								distributed = false
+								for (let k = 0; k < marked.length; k++) {
+									if (marked[k] === 1) {
+										let leftSpace = 0
+										let rightSpace = 0
+										for (let l = 1; l < marked.length; l++) {
+											if (marked[(k + l) % circleLength] === 0) {
+												rightSpace += 1
+											} else {
+												break
+											}
+										}
+										for (let l = 1; l < marked.length; l++) {
+											if (marked[(circleLength + k - l) % circleLength] === 0) {
+												leftSpace += 1
+											} else {
+												break
+											}
+										}
+
+										if (Math.abs(leftSpace - rightSpace) > 1) {
+											distributed = true
+											let offset = Math.ceil((leftSpace + rightSpace + 1) / 2)
+											let toMark = ((circleLength + k - leftSpace) % circleLength) + offset - 1
+											marked[toMark] = 1
+											marked[k] = 0
+										}
+									}
+								}
+							} while (distributed)
+
+							marked.forEach(function (isMarked, m) {
+								if (isMarked === 1) {
+									electrons[m].setAttribute('fill', 'darkorchid')
+								}
 							})
 						}
 

@@ -3,6 +3,7 @@ class Visualization {
 		this.renderEl = element
 		this.fullscreenEl = element.querySelector('img')
 		this.fpsEl = element.querySelector('div')
+		this.resolutionEl = element.querySelector('div:nth-child(2)')
 		this.frames = 0
 		this.lastTime = -1
 		this.continue = true
@@ -18,7 +19,10 @@ class Visualization {
 
 		// arrow function to keep reference of this to current object
 		this.animate = (time) => {
-			this.renderer.render(this.scene, this.camera)
+			if (this.camera.hasChanged) {
+				this.camera.hasChanged = false
+				this.renderer.render(this.scene, this.camera)
+			}
 			this.frames++
 
 			if (this.currentIndex === this.maxIndex + 1) {
@@ -27,7 +31,8 @@ class Visualization {
 			this.frameRates[this.currentIndex] = this.frames / (time - this.lastTime) * 1000
 			this.currentIndex++
 			this.averageFrameRate = Math.round(this.frameRates.reduce((sum, el) => sum + el) / this.frameRates.length)
-			this.renderEl.children[0].innerHTML = this.averageFrameRate + ' FPS'
+			this.fpsEl.innerHTML = this.averageFrameRate + ' FPS'
+			this.renderEl.children[1].innerHTML = Math.round(this.width * window.devicePixelRatio) + 'x' + Math.round(this.height * window.devicePixelRatio)
 
 			if (this.averageFrameRate < 35) {
 				this.needsDownsize++
@@ -38,6 +43,7 @@ class Visualization {
 						this.width = newWidth
 						this.height = this.height * 0.8
 						this.renderer.setSize(this.width, this.height, false)
+						this.camera.hasChanged = true
 					}
 				}
 			} else {
@@ -53,6 +59,7 @@ class Visualization {
 						this.width = newWidth
 						this.height = this.height * 1.25
 						this.renderer.setSize(this.width, this.height, false)
+						this.camera.hasChanged = true
 					}
 				}
 			} else {
@@ -118,9 +125,13 @@ class Visualization {
 
 		this.camera = new THREE.PerspectiveCamera(FOV, this.renderEl.clientWidth / this.renderEl.clientHeight, 1, 1000)
 		this.camera.position.set(x, 0, 0)
+		this.camera.hasChanged = true
 		this.scene.add(this.camera)
 
 		this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement)
+		this.controls.addEventListener('change', () => {
+			this.camera.hasChanged = true
+		})
 	}
 
 	onWindowResize() {
@@ -129,6 +140,7 @@ class Visualization {
 		this.renderer.setSize(this.width, this.height, false)
 		this.camera.aspect = this.width / this.height
 		this.camera.updateProjectionMatrix()
+		this.camera.hasChanged = true
 	}
 
 	openFullscreen() {
@@ -146,10 +158,12 @@ class Visualization {
 	showControls() {
 		this.fullscreenEl.classList.remove('d-none')
 		this.fpsEl.classList.remove('d-none')
+		this.resolutionEl.classList.remove('d-none')
 	}
 
 	hideControls() {
 		this.fullscreenEl.classList.add('d-none')
 		this.fpsEl.classList.add('d-none')
+		this.resolutionEl.classList.add('d-none')
 	}
 }

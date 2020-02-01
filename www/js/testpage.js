@@ -7,10 +7,11 @@ vueParams.data = () => {
 		correctSyntax: '',
 		inputDataStripped: '',
 		lastData: '',
+		showCorrect: false,
 	}
 }
 
-vueParams.methods = {
+Object.assign(vueParams.methods, {
 	check: function () {
 		if (!isInProtonNumberRange(this.inputNumber)) {
 			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
@@ -19,6 +20,7 @@ vueParams.methods = {
 		} else if (this.inputData.trim() === '') {
 			alert('Configuration must not be empty.')
 		} else if (isValidProtonNumber(this.inputNumber)) {
+			this.showCorrect = false
 			this.protonNumber = this.inputNumber
 			this.lastData = this.inputData
 			this.isCorrect = true
@@ -56,6 +58,6 @@ vueParams.methods = {
 	removeSpaces: function (string) {
 		return string.replace(/\s/g, '')
 	},
-}
+})
 
 var app = new Vue(vueParams)

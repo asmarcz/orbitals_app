@@ -26,14 +26,30 @@ let vueParams = {
 	el: '#app',
 	computed: {
 		orbitals: function () {
+			let controller = this.getController()
+			controller.checkExceptions()
+			return controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+		},
+		shortOrbitalsIndexes: function () {
+			return this.getShortOrbitals(this.orbitals)
+		},
+		orbitalsNoEx: function () {
+			let controller = this.getController()
+			return controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+		},
+		shortOrbitalsIndexesNoEx: function () {
+			return this.getShortOrbitals(this.orbitalsNoEx)
+		},
+	},
+	methods: {
+		getController: function () {
 			let element = new Element(this.protonNumber)
 			let mainQuantum = new QuantumLayer(1)
 			let controller = new Controller(element, mainQuantum, exceptions)
 			controller.initiate()
-			controller.checkExceptions()
-			return element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			return controller
 		},
-		shortOrbitalsIndexes: function () {
+		getShortOrbitals: function (orbitals) {
 			let lastNobleGas
 			for (let i = nobleGases.length - 1; i >= 0; i--) {
 				if (nobleGases[i] < this.protonNumber) {
@@ -42,7 +58,7 @@ let vueParams = {
 			}
 			let seekedLayer = 1 + (typeof lastNobleGas === 'undefined' ? 0 : layers.findIndex(array => array.includes(this.protonNumber)))
 			let indexes = []
-			this.orbitals.forEach(function (orbital, i) {
+			orbitals.forEach(function (orbital, i) {
 				if (orbital.n === seekedLayer && (orbital.type === 0 || orbital.type === 1)) {
 					indexes.push(i)
 				} else if (orbital.n === seekedLayer - 1 && orbital.type === 2) {
@@ -54,7 +70,7 @@ let vueParams = {
 
 			return indexes
 		},
-	}
+	},
 }
 
 // Modernizr

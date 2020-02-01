@@ -13,3 +13,20 @@
 .incorrect {
 	background-color: #dc3500;
 }
+
+#show-correct-wrap {
+	cursor: pointer;
+}
+
+.arrow {
+	font-size: 0.75em;
+	transition: 300ms;
+}
+
+.rotate-arrow {
+	transform: rotate(180deg);
+}
+
+.show-correct {
+	text-decoration: underline;
+}

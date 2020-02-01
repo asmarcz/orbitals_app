@@ -1,7 +1,7 @@
 {block title}Test{/block}
 
 {block style}
-	<link rel="stylesheet" href="{$basePath}/css/testpage.css">
+	<link rel="stylesheet" href="{$basePath}/css/testpage.css" xmlns="http://www.w3.org/1999/html">
 {/block}
 
 {block content}
@@ -48,6 +48,16 @@
 					</div>
 					<div v-else class="incorrect">
 						{{ lastData }} is incorrect! 😕
+					</div>
+					<div v-if="!isCorrect" class="correct mt-2">
+						<div @click="showCorrect = !showCorrect" id="show-correct-wrap">
+							<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
+							<span class="show-correct">Show me correct version.</span>
+							<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
+						</div>
+						<div v-if="showCorrect">
+							{{ correctSyntax }}
+						</div>
 					</div>
 				</div>
 			</div>

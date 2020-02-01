@@ -118,7 +118,7 @@ Object.assign(vueParams.computed, {
 	},
 })
 
-vueParams.methods = {
+Object.assign(vueParams.methods, {
 	calculate: function () {
 		if (!isInProtonNumberRange(this.inputNumber)) {
 			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
@@ -206,7 +206,7 @@ vueParams.methods = {
 			this.visualizations[index].openFullscreen()
 		}
 	},
-}
+})
 
 vueParams.beforeMount = function () {
 	this.hash = window.location.hash

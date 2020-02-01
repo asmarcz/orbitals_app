@@ -52,6 +52,8 @@ function doubleAnimationFrame(callable) {
 	})
 }
 
+let keysFlag = false
+
 vueParams.data = function () {
 	return {
 		inputNumber: '',
@@ -168,6 +170,7 @@ vueParams.methods = {
 		}
 	},
 	addModel: function (index, ev) {
+		keysFlag = true
 		if (!this.models.includes(index) && this.isWebGLAvailable) {
 			this.models.push(index)
 			let visualizationElement = ev.currentTarget.querySelector('.renderer')
@@ -230,6 +233,7 @@ vueParams.watch = {
 
 			this.visualizations[this.opened].hideControls()
 			doubleAnimationFrame(() => {
+				keysFlag = true
 				this.changeVisualization(element, this.opened, orbital.n, orbital.type, this.mS[this.opened], 0.1, 0.2)
 				this.visualizations[this.opened].showControls()
 			})
@@ -408,10 +412,13 @@ var app = new Vue(vueParams)
 window.addEventListener('hashchange', function () {
 	app.hash = window.location.hash
 })
-window.addEventListener('click', function () {
-	app.visualizations.forEach(function (visualization) {
-		visualization.controls.enableKeys = false
-	})
+window.addEventListener('click', function (ev) {
+	if (keysFlag) {
+		app.visualizations.forEach(function (visualization) {
+			visualization.controls.enableKeys = false
+		})
+		keysFlag = false
+	}
 })
 window.addEventListener('fullscreenchange', function () {
 	if (document.fullscreenElement === null) {

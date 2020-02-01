@@ -101,7 +101,7 @@
 									Magnetic number<br>
 									<template v-for="(m, i) in getOrientations(orbital.type)">
 										<input v-model="mS[index]" :value="m" :id="'radio' + index + '-' + i" class="d-none" type="radio">
-										<label :for="'radio' + index + '-' + i" class="d-inline-block m-0 px-2 py-0">{{ m }}</label>
+										<label @click.stop :for="'radio' + index + '-' + i" class="d-inline-block m-0 px-2 py-0">{{ m }}</label>
 									</template>
 								</form>
 								<div @click.stop="addModel(index, $event)" class="canvas row overflow-hidden position-relative mx-auto mt-2 mb-2 pt-2 pb-2">

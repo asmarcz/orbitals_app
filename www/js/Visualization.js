@@ -105,8 +105,8 @@ class Visualization {
 			colors.push(i, 0, 1)
 		}
 
-		geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-		geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+		geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+		geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
 
 		let material = new THREE.PointsMaterial({ size: 1, vertexColors: THREE.VertexColors })
 		let points = new THREE.Points(geometry, material)

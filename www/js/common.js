@@ -25,17 +25,21 @@ sortElements()
 let vueParams = {
 	el: '#app',
 	computed: {
+		controller: function () {
+			return this.getController()
+		},
 		orbitals: function () {
-			let controller = this.getController()
-			controller.checkExceptions()
-			return controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			this.controller.checkExceptions()
+			return this.controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
 		},
 		shortOrbitalsIndexes: function () {
 			return this.getShortOrbitals(this.orbitals)
 		},
+		controllerNoEx: function () {
+			return this.getController()
+		},
 		orbitalsNoEx: function () {
-			let controller = this.getController()
-			return controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			return this.controllerNoEx.element.orbitals.filter(orbital => orbital.electronNumber > 0)
 		},
 		shortOrbitalsIndexesNoEx: function () {
 			return this.getShortOrbitals(this.orbitalsNoEx)

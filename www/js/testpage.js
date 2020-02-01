@@ -1,13 +1,31 @@
+function compareCorrect(correct, test) {
+	if (correct.length === test.length) {
+		for (let i = 0; i < test.length; i++) {
+			let index = correct.findIndex(e => e === test[i])
+			if (index === -1) {
+				return false
+			} else {
+				correct[index] = undefined
+			}
+		}
+		return true
+	}
+	return false
+}
+
 vueParams.data = () => {
 	return {
 		inputNumber: '',
 		protonNumber: 0,
 		inputData: '',
 		isCorrect: true,
+		correctSyntaxNoEx: '',
 		correctSyntax: '',
 		inputDataStripped: '',
 		lastData: '',
 		showCorrect: false,
+		isException: false,
+		isExceptionCorrect: false,
 	}
 }
 
@@ -21,9 +39,10 @@ Object.assign(vueParams.methods, {
 			alert('Configuration must not be empty.')
 		} else if (isValidProtonNumber(this.inputNumber)) {
 			this.showCorrect = false
+			this.isException = false
+			this.isExceptionCorrect = false
 			this.protonNumber = this.inputNumber
 			this.lastData = this.inputData
-			this.isCorrect = true
 			let temp = this.removeSpaces(this.inputData)
 				.replace(/^,+|,+$/g, '')
 			if (temp.match(/[^0-9a-zA-Z,]/g) !== null) {
@@ -31,24 +50,21 @@ Object.assign(vueParams.methods, {
 			} else {
 				this.inputDataStripped = temp
 				temp = temp.split(',')
-				let correctOrbitals = this.shortOrbitalsIndexes.map(e => {
-					let orbital = this.orbitals[e]
+				let correctOrbitals = this.shortOrbitalsIndexesNoEx.map(e => {
+					let orbital = this.orbitalsNoEx[e]
 					return orbital.n + getOrbitalTypeText(orbital.type) + orbital.electronNumber
 				})
-				this.correctSyntax = correctOrbitals.join(', ')
+				this.correctSyntaxNoEx = correctOrbitals.join(', ')
 
-				if (correctOrbitals.length === temp.length) {
-					for (let i = 0; i < temp.length; i++) {
-						let index = correctOrbitals.findIndex(e => e === temp[i])
-						if (index === -1) {
-							this.isCorrect = false
-							break
-						} else {
-							correctOrbitals[index] = undefined
-						}
-					}
-				} else {
-					this.isCorrect = false
+				this.isCorrect = compareCorrect(correctOrbitals, temp)
+				if (this.controllerNoEx.isException()) {
+					this.isException = true
+					correctOrbitals = this.shortOrbitalsIndexes.map(e => {
+						let orbital = this.orbitals[e]
+						return orbital.n + getOrbitalTypeText(orbital.type) + orbital.electronNumber
+					})
+					this.correctSyntax = correctOrbitals.join(', ')
+					this.isExceptionCorrect = compareCorrect(correctOrbitals, temp)
 				}
 			}
 

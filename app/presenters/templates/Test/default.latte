@@ -41,24 +41,46 @@
 				<div class="col-12 col-md-10 col-lg-7 mt-2">
 					<div v-if="isCorrect" class="correct">
 						{{ lastData }} is correct!<br>
-						<template v-if="removeSpaces(correctSyntax) !== this.inputDataStripped">
+						<template v-if="removeSpaces(correctSyntaxNoEx) !== this.inputDataStripped">
 							Try this order next time&nbsp;😉&nbsp;:<br>
+							{{ correctSyntaxNoEx }}<br v-if="isException">
+						</template>
+						<template v-if="isException">
+							The real life version is:<br>
 							{{ correctSyntax }}
 						</template>
 					</div>
-					<div v-else class="incorrect">
-						{{ lastData }} is incorrect! 😕
+					<div v-else-if="isExceptionCorrect" class="correct">
+						{{ lastData }} is correct!<br>
+						<template v-if="removeSpaces(correctSyntax) !== this.inputDataStripped">
+							Try this order next time&nbsp;😉&nbsp;:<br>
+							{{ correctSyntax }}<br>
+						</template>
+						The systematic version is:<br>
+						{{ correctSyntaxNoEx }}
 					</div>
-					<div v-if="!isCorrect" class="correct mt-2">
-						<div @click="showCorrect = !showCorrect" id="show-correct-wrap">
-							<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
-							<span class="show-correct">Show me correct version.</span>
-							<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
+					<template v-else>
+						<div class="incorrect">
+							{{ lastData }} is incorrect! 😕
 						</div>
-						<div v-if="showCorrect">
-							{{ correctSyntax }}
+						<div class="correct mt-2">
+							<div @click="showCorrect = !showCorrect" id="show-correct-wrap">
+								<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
+								<span class="show-correct">Show me correct version.</span>
+								<span :class="{ 'rotate-arrow': showCorrect }" class="arrow d-inline-block">▼</span>
+							</div>
+							<div v-if="showCorrect">
+								<template v-if="isException">
+									The systematic version is:<br>
+								</template>
+								{{ correctSyntaxNoEx }}
+								<template v-if="isException">
+									<br>The real life version is:<br>
+									{{ correctSyntax }}
+								</template>
+							</div>
 						</div>
-					</div>
+					</template>
 				</div>
 			</div>
 		</div>

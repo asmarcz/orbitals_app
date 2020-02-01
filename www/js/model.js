@@ -84,6 +84,8 @@ class Controller {
 		this.element = element;
 		this.maxN = quantumLayer.n;
 		this.exceptions = exceptions;
+		this._isException = false
+		this.checked = false
 	}
 
 	createQuantumLayer() {
@@ -130,16 +132,30 @@ class Controller {
 		}
 	}
 
-	checkExceptions() {
-		let lastDExceptionOrbital = this.element.orbitals.find((orbital) => {
+	getLastDExceptionOrbital() {
+		return this.element.orbitals.find((orbital) => {
 			return orbital.type === 2 && (orbital.electronNumber === 4 || orbital.electronNumber === 9);
 		});
+	}
+
+	isException() {
+		return this._isException ||
+			(!this.checked && (
+				(this.element.electronNumber in this.exceptions) ||
+				(typeof this.getLastDExceptionOrbital() !== 'undefined')
+			))
+	}
+
+	checkExceptions() {
+		let lastDExceptionOrbital = this.getLastDExceptionOrbital()
 		if (typeof lastDExceptionOrbital !== 'undefined') {
 			let lastSOrbital = this.element.orbitals.slice().reverse().find((orbital) => {
 				return orbital.type === 0;
 			});
 			lastSOrbital.electronNumber--;
 			lastDExceptionOrbital.electronNumber++;
+
+			this._isException = true
 		}
 
 		if (this.element.electronNumber in this.exceptions) {
@@ -160,7 +176,11 @@ class Controller {
 			}
 
 			this.element.orbitals.sort(aufbauOrder)
+
+			this._isException = true
 		}
+
+		this.checked = true
 	}
 }
 

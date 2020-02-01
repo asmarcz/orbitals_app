@@ -74,6 +74,26 @@ Object.assign(vueParams.methods, {
 	removeSpaces: function (string) {
 		return string.replace(/\s/g, '')
 	},
+	scrollDown: function () {
+		this.$nextTick(function () {
+			let bottom = document.body.getBoundingClientRect().bottom
+			if (bottom > window.innerHeight) {
+				window.scrollTo({
+					top: bottom,
+					behavior: 'smooth',
+				})
+			}
+		})
+	}
 })
+
+vueParams.watch = {
+	protonNumber: 'scrollDown',
+	showCorrect: function () {
+		if (this.showCorrect) {
+			this.scrollDown()
+		}
+	},
+}
 
 var app = new Vue(vueParams)

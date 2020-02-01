@@ -131,6 +131,15 @@ Object.assign(vueParams.methods, {
 			this.showShort = this.inputShort
 
 			hideKeyboard()
+			doubleAnimationFrame(function () {
+				doubleAnimationFrame(function () {
+					let y = window.pageYOffset + calcForm.nextElementSibling.getBoundingClientRect().top
+					window.scrollTo({
+						top: y,
+						behavior: 'smooth',
+					})
+				})
+			})
 		}
 	},
 	toggleOpen: function (index, ev) {
@@ -408,6 +417,8 @@ vueParams.components = {
 }
 
 var app = new Vue(vueParams)
+
+let calcForm = document.getElementById('calc-form')
 
 window.addEventListener('hashchange', function () {
 	app.hash = window.location.hash

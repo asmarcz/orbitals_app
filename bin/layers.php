@@ -13,5 +13,4 @@ $layers[4] = getRange(37, 54);
 $layers[5] = getRange(55, 86);
 $layers[6] = getRange(87, 118);
 
-$neon = \Nette\Neon\Neon::encode(['parameters' => ['layers' => $layers]], \Nette\Neon\Neon::BLOCK);
-file_put_contents(__DIR__ . '/../app/config/layers.neon', $neon);
+file_put_contents(__DIR__ . '/../config/layers.json', json_encode($layers));

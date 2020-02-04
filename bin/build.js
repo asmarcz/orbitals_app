@@ -108,9 +108,9 @@ for (let i = 0; i < data.length; i++) {
 		const fresh = {}
 		fresh.filename = prefix + "_" + time + "." + ext
 		fresh.path = dist + "/" + fresh.filename
-		try {
+		if (fs.existsSync(src + "/" + prefix + "." + ext)) {
 			fresh.content = fs.readFileSync(src + "/" + prefix + "." + ext, "utf-8")
-		} catch (e) {
+		} else {
 			fresh.content = ""
 		}
 		if (typeof on !== "undefined" && typeof on.fresh !== "undefined") {

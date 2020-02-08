@@ -30,12 +30,13 @@ function removing(name) {
 	console.log("R: " + name)
 }
 
-let time = ""
-{
+function getTime() {
 	let d = new Date()
+	let time = ""
 	for (let part of [d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]) {
 		time += part.toString().padStart(2, "0")
 	}
+	return time
 }
 
 const jsSrc = path.join(__dirname, "..", "src", "js")
@@ -88,7 +89,7 @@ function diffIt(fresh, old) {
 	return false
 }
 
-let scheme = {
+let schemes = {
 	scripts: {
 		names: ["common", "homepage", "model", "OrbitControls", "schrodinger", "testpage", "Visualization"],
 		dist: jsDist,
@@ -127,27 +128,41 @@ let scheme = {
 	},
 }
 
-for (let key in scheme) {
-	let {dist, ext, names, on, src, vars} = scheme[key]
-	for (let prefix of names) {
-		const old = getOld(dist, prefix)
-		if (typeof on !== "undefined" && typeof on.old !== "undefined") {
-			on.old(old)
-		}
+function doPrefix(prefix, schema) {
+	let {dist, ext, on, src, vars} = schema
 
-		const fresh = {}
-		fresh.filename = prefix + "_" + time + "." + ext
-		fresh.path = path.join(dist, fresh.filename)
-		if (typeof src !== "undefined" && fs.existsSync(path.join(src, prefix + "." + ext))) {
-			fresh.content = fs.readFileSync(path.join(src, prefix + "." + ext), "utf-8")
-		} else {
-			fresh.content = ""
-		}
-		if (typeof on !== "undefined" && typeof on.fresh !== "undefined") {
-			on.fresh(fresh)
-		}
+	const old = getOld(dist, prefix)
+	if (typeof on !== "undefined" && typeof on.old !== "undefined") {
+		on.old(old)
+	}
 
-		vars[prefix] = diffIt(fresh, old) ? fresh.filename : old.filename
+	const fresh = {}
+	fresh.filename = prefix + "_" + getTime() + "." + ext
+	fresh.path = path.join(dist, fresh.filename)
+	if (typeof src !== "undefined") {
+		fresh.content = fs.readFileSync(path.join(src, prefix + "." + ext), "utf-8")
+	} else {
+		fresh.content = ""
+	}
+	if (typeof on !== "undefined" && typeof on.fresh !== "undefined") {
+		on.fresh(fresh)
+	}
+
+	vars[prefix] = diffIt(fresh, old) ? fresh.filename : old.filename
+}
+
+for (let key in schemes) {
+	const schema = schemes[key]
+	if (isDev && typeof schema.src !== "undefined") {
+		watch(schema.src, (evt, name) => {
+			let prefix = path.parse(name).name
+			if (schema.names.includes(prefix)) {
+				doPrefix(prefix, schema)
+			}
+		})
+	}
+	for (let prefix of schema.names) {
+		doPrefix(prefix, schema)
 	}
 }
 

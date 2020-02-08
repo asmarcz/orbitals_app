@@ -202,10 +202,10 @@ Object.assign(vueParams.methods, {
 		}
 	},
 	getRowIconAddress: function (show) {
-		return basePath + '/assets/' + (show ? 'plus' : 'hide') + '.svg'
+		return 'assets/' + (show ? 'plus' : 'hide') + '.svg'
 	},
 	getFullscreenIconAddress: function (index) {
-		return basePath + '/assets/' + (typeof this.visualizations[index] !== 'undefined' && this.visualizations[index].isFullscreen ? 'close' : 'open') + '-fullscreen.svg'
+		return 'assets/' + (typeof this.visualizations[index] !== 'undefined' && this.visualizations[index].isFullscreen ? 'close' : 'open') + '-fullscreen.svg'
 	},
 	toggleFullscreen: function (index) {
 		if (this.visualizations[index].isFullscreen) {

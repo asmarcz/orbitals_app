@@ -51,6 +51,10 @@ const defaults = {
 	styles: {},
 }
 
+function getPrefix(str) {
+	return /[^_]+/.exec(path.basename(str))[0]
+}
+
 function getOld(directory, prefix, content = true) {
 	const old = {
 		content: "",
@@ -102,6 +106,9 @@ let schemes = {
 					presets: [["minify", {
 						"mangle": false, // https://github.com/babel/minify/issues/556
 					}]],
+					sourceMaps: "inline",
+					sourceRoot: path.dirname(fresh.path),
+					sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
 				}).code
 			},
 		},

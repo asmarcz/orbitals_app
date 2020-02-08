@@ -195,7 +195,10 @@ for (let key in scheme) {
 	const layout = {}
 	layout.filename = "layout.html"
 	layout.path = path.join(htmlSrc, layout.filename)
-	layout.content = fs.readFileSync(layout.path, "utf-8")
+
+	function loadLayoutContent() {
+		layout.content = fs.readFileSync(layout.path, "utf-8")
+	}
 
 	function template(name) {
 		let sub = fs.readFileSync(name, "utf-8")
@@ -214,12 +217,14 @@ for (let key in scheme) {
 		}
 	}
 
+	loadLayoutContent()
 	allTemplates()
 	if (isDev) {
 		watch(htmlSrc, function (evt, name) {
 			switch (evt) {
 				case "update":
-					if (name === layout.filename) {
+					if (name === layout.path) {
+						loadLayoutContent()
 						allTemplates()
 					} else {
 						template(name)

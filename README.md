@@ -6,6 +6,16 @@ Orbitals.app can be used to learn the electron configurations of elements of per
 # Build
 In the root of cloned repository run:
 1. `npm install`
-1. `node bin/build.js`
+1. `node bin/build.js --WVars`
 
 The `www` (dist) directory is now deployable. 
+
+# Options
+
+Flag `--dev` watches for changes on files in schema.
+
+Flag `--WVars` makes errors for not defined variables only warnings.
+
+To use development mode successfully you will currently need both flags because some variables need empty string as default:
+
+`node bin/build.js --dev --WVars`

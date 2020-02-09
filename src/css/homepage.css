@@ -85,20 +85,32 @@
 	color: #252525;
 }
 
+.atom object {
+	pointer-events: none;
+}
+
+.atom img {
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	opacity: 0;
+}
+
 @media screen and (min-width: 768px) {
-	.atom img {
+	.atom object, .atom img {
 		max-height: 35vh;
 	}
 }
 
 @media screen and (min-width: 992px) {
-	.atom img {
+	.atom object, .atom img {
 		max-height: 45vh;
 	}
 }
 
 @media screen and (min-width: 1200px) {
-	.atom img {
+	.atom object, .atom img {
 		max-height: none;
 	}
 }

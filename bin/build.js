@@ -51,6 +51,8 @@ const defaults = {
 	styles: {},
 }
 
+let variableDeps = {}
+
 function getPrefix(str) {
 	return /[^_]+/.exec(path.basename(str))[0]
 }
@@ -100,6 +102,7 @@ let schemes = {
 		src: jsSrc,
 		ext: "js",
 		vars: defaults.scripts,
+		varsPath: "scripts",
 		on: {
 			fresh: function (fresh) {
 				const options = {
@@ -124,12 +127,14 @@ let schemes = {
 		src: cssSrc,
 		ext: "css",
 		vars: defaults.styles,
+		varsPath: "styles",
 	},
 	config: {
 		names: ["config"],
 		dist: jsDist,
 		ext: "js",
 		vars: defaults.scripts,
+		varsPath: "scripts",
 		on: {
 			fresh: function (fresh) {
 				for (let name of ["exceptions", "elements", "ranges", "layers", "nobleGases"]) {
@@ -169,7 +174,21 @@ for (let key in schemes) {
 		watch(schema.src, (evt, name) => {
 			let prefix = path.parse(name).name
 			if (schema.names.includes(prefix)) {
+				let oldVar = schema.vars[prefix]
 				doPrefix(prefix, schema)
+				if (oldVar !== schema.vars[prefix]) {
+					for (let t in variableDeps) {
+						if (variableDeps[t].includes(
+							schema.varsPath + "." + prefix
+						)) {
+							if (t === layout.filename) {
+								allTemplates()
+							} else {
+								template(path.join(htmlSrc, t))
+							}
+						}
+					}
+				}
 			}
 		})
 	}
@@ -178,92 +197,101 @@ for (let key in schemes) {
 	}
 }
 
-{
-	function extractVars(template) {
-		let ret = {}
-		let regExp = /%> ([a-zA-Z]+) <%([\s\S]*?)%> \1 <%/g
+function extractVars(template) {
+	let ret = {}
+	let regExp = /%> ([a-zA-Z]+) <%([\s\S]*?)%> \1 <%/g
+	for (let match of template.matchAll(regExp)) {
+		ret[match[1]] = match[2]
+	}
+	return ret
+}
+
+function replaceVars(template, vars) {
+	let matched = true
+	let regExp = /<% ([a-zA-Z.]+) %>/g
+	while (matched) {
+		matched = false
 		for (let match of template.matchAll(regExp)) {
-			ret[match[1]] = match[2]
-		}
-		return ret
-	}
-
-	function replaceVars(template, vars) {
-		let matched = true
-		let regExp = /<% ([a-zA-Z.]+) %>/g
-		while (matched) {
-			matched = false
-			for (let match of template.matchAll(regExp)) {
-				let value = vars[match[1]]
-				let error = false
-				if (match[1].includes(".")) {
-					try {
-						value = match[1].split(".")
-							.reduce((ob, index) => ob[index], vars)
-					} catch (e) {
-						error = true
-					}
+			let value = vars[match[1]]
+			let error = false
+			if (match[1].includes(".")) {
+				try {
+					value = match[1].split(".")
+						.reduce((ob, index) => ob[index], vars)
+				} catch (e) {
+					error = true
 				}
-				if (typeof value === "undefined" || error) {
-					if (WVars) {
-						value = ""
-						warning(`Variable ${match[1]} doesn't exist. Setting to empty string.`)
-					} else {
-						throw new Error(`Variable ${match[1]} doesn't exist.`)
-					}
+			}
+			if (typeof value === "undefined" || error) {
+				if (WVars) {
+					value = ""
+					warning(`Variable ${match[1]} doesn't exist. Setting to empty string.`)
+				} else {
+					throw new Error(`Variable ${match[1]} doesn't exist.`)
 				}
-				template = template.replace("<% " + match[1] + " %>", value)
-				matched = true
 			}
-		}
-		return template
-	}
-
-	const layout = {}
-	layout.filename = "layout.html"
-	layout.path = path.join(htmlSrc, layout.filename)
-
-	function loadLayoutContent() {
-		layout.content = fs.readFileSync(layout.path, "utf-8")
-	}
-
-	function template(name) {
-		let sub = fs.readFileSync(name, "utf-8")
-		let vars = Object.assign(JSON.parse(JSON.stringify(defaults)), extractVars(sub))
-		let fresh = replaceVars(layout.content, vars)
-		let newPath = path.join(htmlDist, path.basename(name))
-		updating(newPath)
-		fs.writeFileSync(newPath, fresh)
-	}
-
-	function allTemplates() {
-		for (let name of fs.readdirSync(htmlSrc)) {
-			if (name !== layout.filename) {
-				template(path.join(htmlSrc, name))
-			}
+			template = template.replace("<% " + match[1] + " %>", value)
+			matched = true
 		}
 	}
+	return template
+}
 
-	loadLayoutContent()
-	allTemplates()
-	if (isDev) {
-		watch(htmlSrc, function (evt, name) {
-			switch (evt) {
-				case "update":
-					if (name === layout.path) {
-						loadLayoutContent()
-						allTemplates()
-					} else {
-						template(name)
-					}
-					break
-				case "remove":
-					const old = getOld(htmlDist, path.parse(name).name)
-					let newPath = path.join(htmlDist, old.filename)
-					removing(newPath)
-					fs.unlinkSync(newPath)
-					break
-			}
-		})
+function listVars(template) {
+	let regExp = /<% ([a-zA-Z.]+) %>/g
+	let ret = []
+	for (let match of template.matchAll(regExp)) {
+		ret.push(match[1])
 	}
+	return ret
+}
+
+const layout = {}
+layout.filename = "layout.html"
+layout.path = path.join(htmlSrc, layout.filename)
+
+function loadLayoutContent() {
+	layout.content = fs.readFileSync(layout.path, "utf-8")
+	variableDeps[layout.filename] = listVars(layout.content)
+}
+
+function template(name) {
+	let sub = fs.readFileSync(name, "utf-8")
+	variableDeps[path.basename(name)] = listVars(sub)
+	let vars = Object.assign(JSON.parse(JSON.stringify(defaults)), extractVars(sub))
+	let fresh = replaceVars(layout.content, vars)
+	let newPath = path.join(htmlDist, path.basename(name))
+	updating(newPath)
+	fs.writeFileSync(newPath, fresh)
+}
+
+function allTemplates() {
+	for (let name of fs.readdirSync(htmlSrc)) {
+		if (name !== layout.filename) {
+			template(path.join(htmlSrc, name))
+		}
+	}
+}
+
+loadLayoutContent()
+allTemplates()
+if (isDev) {
+	watch(htmlSrc, function (evt, name) {
+		switch (evt) {
+			case "update":
+				if (name === layout.path) {
+					loadLayoutContent()
+					allTemplates()
+				} else {
+					template(name)
+				}
+				break
+			case "remove":
+				const old = getOld(htmlDist, path.parse(name).name)
+				let newPath = path.join(htmlDist, old.filename)
+				removing(newPath)
+				fs.unlinkSync(newPath)
+				break
+		}
+	})
 }

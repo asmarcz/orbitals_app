@@ -87,6 +87,7 @@
 
 .atom object {
 	pointer-events: none;
+	top: 30%;
 }
 
 .atom img {

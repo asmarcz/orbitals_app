@@ -52,6 +52,18 @@ function doubleAnimationFrame(callable) {
 	})
 }
 
+function scrollToContent() {
+	doubleAnimationFrame(function () {
+		doubleAnimationFrame(function () {
+			let y = window.pageYOffset + calcForm.nextElementSibling.getBoundingClientRect().top
+			window.scrollTo({
+				top: y,
+				behavior: 'smooth',
+			})
+		})
+	})
+}
+
 let keysFlag = false
 
 vueParams.data = function () {
@@ -68,6 +80,7 @@ vueParams.data = function () {
 		inputShort: true,
 		showShort: true,
 		isFullscreenAvailable: isFullscreenAvailable(),
+		svgModel: undefined,
 	}
 }
 
@@ -129,17 +142,10 @@ Object.assign(vueParams.methods, {
 			this.electronNumber = this.inputNumber
 			window.location.hash = '#' + this.protonNumber
 			this.showShort = this.inputShort
+			this.svgModel = undefined
 
 			hideKeyboard()
-			doubleAnimationFrame(function () {
-				doubleAnimationFrame(function () {
-					let y = window.pageYOffset + calcForm.nextElementSibling.getBoundingClientRect().top
-					window.scrollTo({
-						top: y,
-						behavior: 'smooth',
-					})
-				})
-			})
+			scrollToContent()
 		}
 	},
 	toggleOpen: function (index, ev) {
@@ -215,6 +221,29 @@ Object.assign(vueParams.methods, {
 			this.visualizations[index].openFullscreen()
 		}
 	},
+	coloring: function (index, fill) {
+		let orbital = this.orbitals[index]
+		let isValence = this.valenceIndexes.includes(index)
+		let svgModel = this.getSvgModel()
+		let suffix = isValence ? "v-" : ""
+		let offset = this.orbitals.filter((o, i) => {
+			return o.n === orbital.n &&
+				o.type < orbital.type &&
+				!(isValence ^ this.valenceIndexes.includes(i))
+		}).reduce((a, o) => a + o.electronNumber, 0)
+		for (let i = 0; i < orbital.electronNumber; i++) {
+			svgModel.getElementById(orbital.n + "-" + suffix + (i + 1 + offset))
+				.setAttribute('stroke', fill)
+		}
+	},
+	getSvgModel: function () {
+		if (typeof this.svgModel === 'undefined') {
+			this.svgModel = document.getElementById('svg-object')
+				.contentDocument
+				.children[0]
+		}
+		return this.svgModel
+	}
 })
 
 vueParams.beforeMount = function () {
@@ -225,7 +254,11 @@ vueParams.watch = {
 	hash: function () {
 		let afterHash = parseFloat(this.hash.substring(1))
 		if (isValidProtonNumber(afterHash)) {
+			let tmp = this.protonNumber
 			this.protonNumber = this.inputNumber = afterHash
+			if (tmp === 0) {
+				scrollToContent()
+			}
 		} else if (this.hash === '' || this.hash === '#') {
 			this.inputNumber = ''
 			this.protonNumber = 0
@@ -400,7 +433,16 @@ vueParams.components = {
 							})
 						}
 
+						let counter = 1
+						let valenceCounter = 1
 						for (let e of electrons) {
+							if (e.getAttribute('fill') === 'green') {
+								e.setAttribute('id', (i + 1) + '-' + counter)
+								counter++
+							} else {
+								e.setAttribute('id', (i + 1) + '-v-' + valenceCounter)
+								valenceCounter++
+							}
 							svg.appendChild(e)
 						}
 					})

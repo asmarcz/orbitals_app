@@ -46,6 +46,13 @@ let vueParams = {
 		shortOrbitalsIndexesNoEx: function () {
 			return this.getShortOrbitals(this.orbitalsNoEx)
 		},
+		configurationText: function () {
+			if (this.showShort) {
+				return this.textForIndexes(this.shortOrbitalsIndexes, this.orbitals)
+			} else {
+				return this.textForIndexes(Object.keys(this.orbitals), this.orbitals)
+			}
+		}
 	},
 	methods: {
 		getController: function () {
@@ -76,6 +83,14 @@ let vueParams = {
 
 			return indexes
 		},
+		textForIndexes: function (indexes, orbitals) {
+			let parts = []
+			for (let i = 0; i < indexes.length; i++) {
+				const orbital = orbitals[indexes[i]]
+				parts.push(orbital.n + getOrbitalTypeText(orbital.type) + `<sup>${orbital.electronNumber}</sup>`)
+			}
+			return parts.join(" ")
+		}
 	},
 }
 

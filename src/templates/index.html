@@ -64,8 +64,11 @@
 		</form>
 		<div v-if="protonNumber" v-cloak class="row mt-3">
 			<div class="col-12 text-center">
-				<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
 				{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}
+				<div class="overflow-auto text-nowrap">
+					<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
+					<span v-html="configurationText"></span>
+				</div>
 			</div>
 			<bohr-model :layer-electrons="layerElectrons"></bohr-model>
 			<div class="col-12 col-lg-7">

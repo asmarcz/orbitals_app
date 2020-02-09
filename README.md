@@ -19,3 +19,9 @@ Flag `--WVars` makes errors for not defined variables only warnings.
 To use development mode successfully you will currently need both flags because some variables need empty string as default:
 
 `node bin/build.js --dev --WVars`
+
+# Web server
+
+For simple web server run:
+
+`php -S localhost:8000 bin/router.php -t www/`

@@ -102,14 +102,19 @@ let schemes = {
 		vars: defaults.scripts,
 		on: {
 			fresh: function (fresh) {
-				fresh.content = babel.transformSync(fresh.content, {
+				const options = {
 					presets: [["minify", {
 						"mangle": false, // https://github.com/babel/minify/issues/556
 					}]],
-					sourceMaps: "inline",
-					sourceRoot: path.dirname(fresh.path),
-					sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
-				}).code
+				}
+				if (isDev) {
+					Object.assign(options, {
+						sourceMaps: "inline",
+						sourceRoot: path.dirname(fresh.path),
+						sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
+					})
+				}
+				fresh.content = babel.transformSync(fresh.content, options).code
 			},
 		},
 	},

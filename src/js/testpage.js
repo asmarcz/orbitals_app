@@ -26,8 +26,15 @@ vueParams.data = () => {
 		showCorrect: false,
 		isException: false,
 		isExceptionCorrect: false,
+		ion: 0,
 	}
 }
+
+Object.assign(vueParams.computed, {
+	elementIndex: function () {
+		return elements.findIndex((e) => e[0] === this.inputNumber)
+	},
+})
 
 Object.assign(vueParams.methods, {
 	check: function () {
@@ -41,7 +48,7 @@ Object.assign(vueParams.methods, {
 			this.showCorrect = false
 			this.isException = false
 			this.isExceptionCorrect = false
-			this.protonNumber = this.inputNumber
+			this.protonNumber = this.inputNumber - this.ion
 			this.lastData = this.inputData
 			let temp = this.removeSpaces(this.inputData)
 				.replace(/^,+|,+$/g, '')
@@ -84,7 +91,10 @@ Object.assign(vueParams.methods, {
 				})
 			}
 		})
-	}
+	},
+	changeIon: function (i) {
+		this.ion += i
+	},
 })
 
 vueParams.watch = {
@@ -94,6 +104,9 @@ vueParams.watch = {
 			this.scrollDown()
 		}
 	},
+	inputNumber: function () {
+		this.ion = 0
+	}
 }
 
 var app = new Vue(vueParams)

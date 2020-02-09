@@ -65,7 +65,10 @@
 		</form>
 		<div v-if="protonNumber" v-cloak class="row mt-3">
 			<div class="col-12 text-center">
-				{{ elements[elementIndex][1] }}: {{ elements[elementIndex][2] }}
+				<button @click="changeIon(-1)" class="ion-button pb-1">-</button>
+				{{ elements[elementIndex][1] }}<sup>{{ ion }}</sup>
+				<button @click="changeIon(1)" class="ion-button pb-1">+</button>
+				: {{ elements[elementIndex][2] }}
 				<div class="overflow-auto text-nowrap">
 					<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
 					<span v-html="configurationText"></span>

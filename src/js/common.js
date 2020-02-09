@@ -90,7 +90,7 @@ let vueParams = {
 				parts.push(orbital.n + getOrbitalTypeText(orbital.type) + `<sup>${orbital.electronNumber}</sup>`)
 			}
 			return parts.join(" ")
-		}
+		},
 	},
 }
 

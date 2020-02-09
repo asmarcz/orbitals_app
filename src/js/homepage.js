@@ -81,13 +81,11 @@ vueParams.data = function () {
 		showShort: true,
 		isFullscreenAvailable: isFullscreenAvailable(),
 		svgModel: undefined,
+		ion: 0,
 	}
 }
 
 Object.assign(vueParams.computed, {
-	elementIndex: function () {
-		return elements.findIndex((e) => e[0] === this.protonNumber)
-	},
 	valenceIndexes: function () {
 		return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
 	},
@@ -129,6 +127,9 @@ Object.assign(vueParams.computed, {
 		})
 		return tmp
 	},
+	elementIndex: function () {
+		return elements.findIndex((e) => e[0] === this.protonNumber + this.ion)
+	},
 })
 
 Object.assign(vueParams.methods, {
@@ -138,8 +139,8 @@ Object.assign(vueParams.methods, {
 		} else if (!isWholeNumber(this.inputNumber)) {
 			alert('Proton number must be an integer not a float.')
 		} else if (isValidProtonNumber(this.inputNumber)) {
+			this.ion = 0
 			this.protonNumber = this.inputNumber
-			this.electronNumber = this.inputNumber
 			window.location.hash = '#' + this.protonNumber
 			this.showShort = this.inputShort
 			this.svgModel = undefined
@@ -243,7 +244,12 @@ Object.assign(vueParams.methods, {
 				.children[0]
 		}
 		return this.svgModel
-	}
+	},
+	changeIon: function (i) {
+		this.ion += i
+		this.protonNumber -= i
+		this.svgModel = undefined
+	},
 })
 
 vueParams.beforeMount = function () {

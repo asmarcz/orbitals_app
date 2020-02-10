@@ -27,6 +27,12 @@ sortElements()
 let vueParams = {
 	el: '#app',
 	computed: {
+		orbitalsView: function () {
+			return this.showExceptions ? this.orbitals : this.orbitalsNoEx
+		},
+		shortOrbitalsIndexesView: function () {
+			return this.showExceptions ? this.shortOrbitalsIndexes : this.shortOrbitalsIndexesNoEx
+		},
 		controller: function () {
 			return this.getController()
 		},
@@ -48,9 +54,9 @@ let vueParams = {
 		},
 		configurationText: function () {
 			if (this.showShort) {
-				return this.textForIndexes(this.shortOrbitalsIndexes, this.orbitals)
+				return this.textForIndexes(this.shortOrbitalsIndexesView, this.orbitalsView)
 			} else {
-				return this.textForIndexes(Object.keys(this.orbitals), this.orbitals)
+				return this.textForIndexes(Object.keys(this.orbitalsView), this.orbitalsView)
 			}
 		}
 	},

@@ -79,6 +79,7 @@ vueParams.data = function () {
 		mS: [],
 		inputShort: true,
 		showShort: true,
+		showExceptions: true,
 		isFullscreenAvailable: isFullscreenAvailable(),
 		svgModel: undefined,
 		ion: 0,
@@ -87,13 +88,13 @@ vueParams.data = function () {
 
 Object.assign(vueParams.computed, {
 	valenceIndexes: function () {
-		return getValenceIndexes(this.orbitals, this.protonNumber, ranges, layers).filter(index => index !== -1)
+		return getValenceIndexes(this.orbitalsView, this.protonNumber, ranges, layers).filter(index => index !== -1)
 	},
 	displayOrbitalsIndexes: function () {
 		if (this.showShort) {
-			return this.shortOrbitalsIndexes
+			return this.shortOrbitalsIndexesView
 		} else {
-			return [...this.orbitals.keys()]
+			return [...this.orbitalsView.keys()]
 		}
 	},
 	nobleGasNumber: function () {
@@ -111,7 +112,7 @@ Object.assign(vueParams.computed, {
 	layerElectrons: function () {
 		let tmp = []
 		tmp.valences = []
-		this.orbitals.forEach((orbital, index) => {
+		this.orbitalsView.forEach((orbital, index) => {
 			let i = orbital.n - 1
 			if (typeof tmp[i] === 'undefined') {
 				tmp[i] = 0
@@ -190,7 +191,7 @@ Object.assign(vueParams.methods, {
 		if (!this.models.includes(index) && this.isWebGLAvailable) {
 			this.models.push(index)
 			let visualizationElement = ev.currentTarget.querySelector('.renderer')
-			let orbital = this.orbitals[index]
+			let orbital = this.orbitalsView[index]
 
 			doubleAnimationFrame(() => {
 				this.changeVisualization(visualizationElement, index, orbital.n, orbital.type, this.mS[index], 0.1, 0.2)
@@ -223,11 +224,11 @@ Object.assign(vueParams.methods, {
 		}
 	},
 	coloring: function (index, fill) {
-		let orbital = this.orbitals[index]
+		let orbital = this.orbitalsView[index]
 		let isValence = this.valenceIndexes.includes(index)
 		let svgModel = this.getSvgModel()
 		let suffix = isValence ? "v-" : ""
-		let offset = this.orbitals.filter((o, i) => {
+		let offset = this.orbitalsView.filter((o, i) => {
 			return o.n === orbital.n &&
 				o.type < orbital.type &&
 				!(isValence ^ this.valenceIndexes.includes(i))
@@ -271,13 +272,13 @@ vueParams.watch = {
 		}
 	},
 	orbitals: function () {
-		this.mS = (new Array(this.orbitals.length)).fill(0)
+		this.mS = (new Array(this.orbitalsView.length)).fill(0)
 	},
 	mS: function () {
 		if (typeof this.visualizations[this.opened] !== 'undefined') {
 			let element = this.visualizations[this.opened].renderEl
 			element.querySelector('canvas').remove()
-			let orbital = this.orbitals[this.opened]
+			let orbital = this.orbitalsView[this.opened]
 
 			this.visualizations[this.opened].hideControls()
 			doubleAnimationFrame(() => {

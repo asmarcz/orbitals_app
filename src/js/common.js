@@ -31,7 +31,7 @@ let vueParams = {
 			return this.showExceptions ? this.orbitals : this.orbitalsNoEx
 		},
 		shortOrbitalsIndexesView: function () {
-			return this.showExceptions ? this.shortOrbitalsIndexes : this.shortOrbitalsIndexesNoEx
+			return this.getShortOrbitals(this.orbitalsView)
 		},
 		controller: function () {
 			return this.getController()

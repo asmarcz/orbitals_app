@@ -13,10 +13,8 @@ function compareCorrect(correct, test) {
 	return false
 }
 
-vueParams.data = () => {
-	return {
-		inputNumber: '',
-		protonNumber: 0,
+vueParams.data = function () {
+	return Object.assign(data, {
 		inputData: '',
 		isCorrect: true,
 		correctSyntaxNoEx: '',
@@ -26,8 +24,7 @@ vueParams.data = () => {
 		showCorrect: false,
 		isException: false,
 		isExceptionCorrect: false,
-		ion: 0,
-	}
+	})
 }
 
 Object.assign(vueParams.computed, {

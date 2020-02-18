@@ -24,6 +24,12 @@ function sortElements() {
 
 sortElements()
 
+const data = {
+	inputNumber: '',
+	protonNumber: 0,
+	ion: 0,
+}
+
 let vueParams = {
 	el: '#app',
 	computed: {

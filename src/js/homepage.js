@@ -67,9 +67,7 @@ function scrollToContent() {
 let keysFlag = false
 
 vueParams.data = function () {
-	return {
-		inputNumber: '',
-		protonNumber: 0,
+	return Object.assign(data, {
 		electronNumber: 0,
 		opened: null,
 		hash: '',
@@ -82,8 +80,7 @@ vueParams.data = function () {
 		showExceptions: true,
 		isFullscreenAvailable: isFullscreenAvailable(),
 		svgModel: undefined,
-		ion: 0,
-	}
+	})
 }
 
 Object.assign(vueParams.computed, {

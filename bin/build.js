@@ -117,7 +117,12 @@ let schemes = {
 						sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
 					})
 				}
-				fresh.content = babel.transformSync(fresh.content, options).code
+				try {
+					fresh.content = babel.transformSync(fresh.content, options).code
+				} catch (e) {
+					if (e.code !== "BABEL_PARSE_ERROR") throw e
+					warning("SyntaxError: " + fresh.path)
+				}
 			},
 		},
 	},

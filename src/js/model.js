@@ -77,6 +77,38 @@ function getValenceIndexes(orbitalsArray, protonNumber, ranges, layers) {
 	return -1
 }
 
+function removeElectrons(orbitals, n) {
+	let ret = JSON.parse(JSON.stringify(orbitals))
+	let c = 0
+	while (c < n) {
+		let orbital = ret.reduce(function (acc, curr) {
+			if (acc.electronNumber === 0) return curr
+			if (curr.electronNumber === 0) return acc
+			if (acc.n === curr.n) {
+				return acc.type > curr.type ? acc : curr
+			}
+			return acc.n > curr.n ? acc : curr
+		})
+		let subtracted = Math.min(n - c, orbital.electronNumber)
+		orbital.electronNumber -= subtracted
+		c += subtracted
+	}
+	return ret
+}
+
+function ionLimits(protonNumber, orbitals, shortIndexes) {
+	if (protonNumber === 1) return [-1, 1];
+	let last = orbitals[orbitals.length - 1]
+	if (ranges[0].includes(protonNumber)) return [0, last.electronNumber]
+	if (ranges[1].includes(protonNumber)) {
+		return [
+			last.electronNumber - maxOrbitalElectronNumber(last.type),
+			maxOrbitalElectronNumber(last.type - 1) + last.electronNumber
+		]
+	}
+	return [0, 0]
+}
+
 class Controller {
 	constructor(element, quantumLayer, exceptions) {
 		/** @type QuantumLayer[] */

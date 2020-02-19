@@ -28,6 +28,8 @@ const data = {
 	inputNumber: '',
 	protonNumber: 0,
 	ion: 0,
+	minIon: 0,
+	maxIon: 0,
 }
 
 let vueParams = {
@@ -44,7 +46,8 @@ let vueParams = {
 		},
 		orbitals: function () {
 			this.controller.checkExceptions()
-			return this.controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			let ret = this.controller.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			return this.ion > 0 ? removeElectrons(ret, this.ion) : ret
 		},
 		shortOrbitalsIndexes: function () {
 			return this.getShortOrbitals(this.orbitals)
@@ -53,7 +56,8 @@ let vueParams = {
 			return this.getController()
 		},
 		orbitalsNoEx: function () {
-			return this.controllerNoEx.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			let ret = this.controllerNoEx.element.orbitals.filter(orbital => orbital.electronNumber > 0)
+			return this.ion > 0 ? removeElectrons(ret, this.ion) : ret
 		},
 		shortOrbitalsIndexesNoEx: function () {
 			return this.getShortOrbitals(this.orbitalsNoEx)
@@ -68,7 +72,7 @@ let vueParams = {
 	},
 	methods: {
 		getController: function () {
-			let element = new Element(this.protonNumber)
+			let element = new Element(this.protonNumber - Math.min(0, this.ion))
 			let mainQuantum = new QuantumLayer(1)
 			let controller = new Controller(element, mainQuantum, exceptions)
 			controller.initiate()
@@ -102,6 +106,9 @@ let vueParams = {
 				parts.push(orbital.n + getOrbitalTypeText(orbital.type) + `<sup>${orbital.electronNumber}</sup>`)
 			}
 			return parts.join(" ")
+		},
+		setIonLimits: function () {
+			[this.minIon, this.maxIon] = ionLimits(this.protonNumber, this.orbitalsView, this.shortOrbitalsIndexesView)
 		},
 	},
 }

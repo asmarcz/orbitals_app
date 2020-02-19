@@ -29,23 +29,22 @@ vueParams.data = function () {
 
 Object.assign(vueParams.computed, {
 	elementIndex: function () {
-		return elements.findIndex((e) => e[0] === this.inputNumber)
+		return elements.findIndex((e) => e[0] === this.protonNumber)
 	},
 })
 
 Object.assign(vueParams.methods, {
 	check: function () {
-		if (!isInProtonNumberRange(this.inputNumber)) {
+		if (!isInProtonNumberRange(this.protonNumber)) {
 			alert(`Proton number must be bigger than 0 and smaller than ${maxProtonNumber + 1}.`)
-		} else if (!isWholeNumber(this.inputNumber)) {
+		} else if (!isWholeNumber(this.protonNumber)) {
 			alert('Proton number must be an integer not a float.')
 		} else if (this.inputData.trim() === '') {
 			alert('Configuration must not be empty.')
-		} else if (isValidProtonNumber(this.inputNumber)) {
+		} else if (isValidProtonNumber(this.protonNumber)) {
 			this.showCorrect = false
 			this.isException = false
 			this.isExceptionCorrect = false
-			this.protonNumber = this.inputNumber - this.ion
 			this.lastData = this.inputData
 			let temp = this.removeSpaces(this.inputData)
 				.replace(/^,+|,+$/g, '')
@@ -95,15 +94,16 @@ Object.assign(vueParams.methods, {
 })
 
 vueParams.watch = {
-	protonNumber: 'scrollDown',
 	showCorrect: function () {
 		if (this.showCorrect) {
 			this.scrollDown()
 		}
 	},
-	inputNumber: function () {
+	protonNumber: function () {
 		this.ion = 0
-	}
+		this.setIonLimits()
+		this.scrollDown()
+	},
 }
 
 var app = new Vue(vueParams)

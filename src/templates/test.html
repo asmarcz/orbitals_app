@@ -11,20 +11,20 @@
 					Test this out!
 				</div>
 				<div class="col-6 col-md-3 col-lg-2 mt-2">
-					<input v-model.number="inputNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
+					<input v-model.number="protonNumber" @focus="$event.target.select()" id="calc-input" class="w-100" type="number"
 						   placeholder="P#">
 				</div>
 				<div class="col-6 col-md-3 col-lg-2 mt-2">
-					<select v-model="inputNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
-						<option value="">Z</option>
+					<select v-model="protonNumber" ref="elementSelect" id="calc-select" class="w-100 h-100">
+						<option value="0">Z</option>
 						<option v-for="element in elements" :value="element[0]">{{ element[1] }}</option>
 					</select>
 				</div>
 				<div class="col-12 col-md-4 col-lg-3 mt-2 text-center">
-					<template v-if="inputNumber !== ''">
-						<button @click.prevent="changeIon(-1)" type="button" class="ion-button pb-1">-</button>
+					<template v-if="protonNumber">
+						<button v-if="ion > minIon" @click.prevent="changeIon(-1)" type="button" class="ion-button pb-1">-</button>
 						{{ elements[elementIndex][1] }}<sup>{{ ion }}</sup>
-						<button @click.prevent="changeIon(1)" type="button" class="ion-button pb-1">+</button>
+						<button v-if="ion < maxIon" @click.prevent="changeIon(1)" type="button" class="ion-button pb-1">+</button>
 					</template>
 				</div>
 			</div>
@@ -42,7 +42,7 @@
 				</div>
 			</div>
 		</form>
-		<div v-if="protonNumber" v-cloak class="text-center">
+		<div v-if="lastData" v-cloak class="text-center">
 			<div class="row justify-content-center">
 				<div class="col-12 col-md-10 col-lg-7 mt-2 mb-2">
 					<div v-if="isCorrect" class="correct">

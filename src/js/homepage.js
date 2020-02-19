@@ -68,7 +68,6 @@ let keysFlag = false
 
 vueParams.data = function () {
 	return Object.assign(data, {
-		electronNumber: 0,
 		opened: null,
 		hash: '',
 		models: [],
@@ -126,7 +125,7 @@ Object.assign(vueParams.computed, {
 		return tmp
 	},
 	elementIndex: function () {
-		return elements.findIndex((e) => e[0] === this.protonNumber + this.ion)
+		return elements.findIndex((e) => e[0] === this.protonNumber)
 	},
 })
 
@@ -142,6 +141,8 @@ Object.assign(vueParams.methods, {
 			window.location.hash = '#' + this.protonNumber
 			this.showShort = this.inputShort
 			this.svgModel = undefined
+
+			this.setIonLimits()
 
 			hideKeyboard()
 			scrollToContent()
@@ -245,7 +246,6 @@ Object.assign(vueParams.methods, {
 	},
 	changeIon: function (i) {
 		this.ion += i
-		this.protonNumber -= i
 		this.svgModel = undefined
 	},
 })
@@ -263,6 +263,7 @@ vueParams.watch = {
 			if (tmp === 0) {
 				scrollToContent()
 			}
+			this.setIonLimits()
 		} else if (this.hash === '' || this.hash === '#') {
 			this.inputNumber = ''
 			this.protonNumber = 0

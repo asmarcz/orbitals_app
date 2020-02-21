@@ -24,4 +24,4 @@ To use development mode successfully you will currently need both flags because 
 
 For simple web server run:
 
-`php -S localhost:8000 bin/router.php -t www/`
+`php -S localhost:8000 -t www/ bin/router.php`

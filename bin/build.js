@@ -39,17 +39,22 @@ function getTime() {
 	return time
 }
 
-const jsSrc = path.join(__dirname, "..", "src", "js")
-const jsDist = path.join(__dirname, "..", "www", "js")
-const cssSrc = path.join(__dirname, "..", "src", "css")
-const cssDist = path.join(__dirname, "..", "www", "css")
-const htmlSrc = path.join(__dirname, "..", "src", "templates")
-const htmlDist = path.join(__dirname, "..", "www")
+const srcDir = path.join(__dirname, "..", "src")
+const wwwDir =  path.join(__dirname, "..", "www")
+const jsSrc = path.join(srcDir, "js")
+const jsDist = path.join(wwwDir, "js")
+const cssSrc = path.join(srcDir, "css")
+const cssDist = path.join(wwwDir, "css")
+const htmlSrc = path.join(srcDir, "templates")
+const htmlDist = wwwDir
+const assetsDist = path.join(wwwDir, "assets")
 
 const defaults = {
 	scripts: {},
 	styles: {},
 }
+
+defaults.assets = fs.readdirSync(assetsDist)
 
 let variableDeps = {}
 
@@ -148,7 +153,13 @@ let schemes = {
 			},
 		},
 	},
+	serviceWorker: {},
 }
+
+Object.assign(schemes.serviceWorker, schemes.scripts, {
+	names: ["sw"],
+	dist: wwwDir,
+})
 
 function doPrefix(prefix, schema) {
 	let {dist, ext, on, src, vars} = schema
@@ -212,6 +223,10 @@ function extractVars(template) {
 }
 
 function replaceVars(template, vars) {
+	function toString(a) {
+		return typeof a === "object" ? JSON.stringify(a) : a
+	}
+
 	let matched = true
 	let regExp = /<% ([a-zA-Z.]+) %>/g
 	while (matched) {
@@ -235,7 +250,7 @@ function replaceVars(template, vars) {
 					throw new Error(`Variable ${match[1]} doesn't exist.`)
 				}
 			}
-			template = template.replace("<% " + match[1] + " %>", value)
+			template = template.replace("<% " + match[1] + " %>", toString(value))
 			matched = true
 		}
 	}

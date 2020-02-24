@@ -25,6 +25,13 @@
 <div class="container mt-4 content">
 	<% content %>
 </div>
+<script>
+	const swFilename = "<% scripts.sw %>"
+	let toCache = []
+	for (let p of [<% scripts %>, <% styles %>, <% assets %>]) {
+		toCache = toCache.concat(Object.values(p))
+	}
+</script>
 <script src="js/<% scripts.config %>"></script>
 <script src="js/<% scripts.common %>"></script>
 <script src="js/<% scripts.model %>"></script>

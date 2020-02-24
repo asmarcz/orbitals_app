@@ -1,3 +1,7 @@
+if ("serviceWorker" in navigator) {
+	navigator.serviceWorker.register(swFilename)
+}
+
 let maxProtonNumber = elements[elements.length - 1][0]
 
 let isTouch

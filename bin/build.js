@@ -6,6 +6,9 @@ const watch = require("node-watch")
 
 let isDev = false
 let WVars = false
+let timestamps = false
+let samebuild = false
+let overwrite = false
 
 for (let opt of process.argv) {
 	switch (opt) {
@@ -14,6 +17,15 @@ for (let opt of process.argv) {
 			break
 		case "--WVars":
 			WVars = true
+			break
+		case "--timestamps":
+			timestamps = true
+			break
+		case "--same-build":
+			samebuild = true
+			break
+		case "--overwrite":
+			overwrite = true
 			break
 	}
 }
@@ -30,13 +42,23 @@ function removing(name) {
 	console.log("R: " + name)
 }
 
+let _time
 function getTime() {
-	let d = new Date()
-	let time = ""
-	for (let part of [d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]) {
-		time += part.toString().padStart(2, "0")
+	function generate() {
+		let d = new Date()
+		let time = ""
+		for (let part of [d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]) {
+			time += part.toString().padStart(2, "0")
+		}
+		return time
 	}
-	return time
+	if (samebuild) {
+		if (typeof _time === "undefined") {
+			_time = generate()
+		}
+		return _time
+	}
+	return generate()
 }
 
 const srcDir = path.join(__dirname, "..", "src")
@@ -48,13 +70,20 @@ const cssDist = path.join(wwwDir, "css")
 const htmlSrc = path.join(srcDir, "templates")
 const htmlDist = wwwDir
 const assetsDist = path.join(wwwDir, "assets")
+const iconsDist = path.join(wwwDir, "icons")
 
 const defaults = {
-	scripts: {},
-	styles: {},
+	scripts: {
+		vue: "vue.min_2.6.11.js",
+		three: "three.min_r113.js",
+	},
+	styles: {
+		bootstrap: "bootstrap.min_4.3.1.css",
+	},
 }
 
 defaults.assets = fs.readdirSync(assetsDist)
+defaults.icons = fs.readdirSync(iconsDist)
 
 let variableDeps = {}
 
@@ -88,7 +117,7 @@ function isDiff(freshContent, oldContent) {
 }
 
 function diffIt(fresh, old) {
-	if (isDiff(fresh.content, old.content)) {
+	if (overwrite || isDiff(fresh.content, old.content)) {
 		if (typeof old.path !== "undefined") {
 			removing(old.path)
 			fs.unlinkSync(old.path)
@@ -100,6 +129,27 @@ function diffIt(fresh, old) {
 	return false
 }
 
+function babelize(fresh) {
+	const options = {
+		presets: [["minify", {
+			"mangle": false, // https://github.com/babel/minify/issues/556
+		}]],
+	}
+	if (isDev) {
+		Object.assign(options, {
+			sourceMaps: "inline",
+			sourceRoot: path.dirname(fresh.path),
+			sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
+		})
+	}
+	try {
+		fresh.content = babel.transformSync(fresh.content, options).code
+	} catch (e) {
+		if (e.code !== "BABEL_PARSE_ERROR") throw e
+		warning("SyntaxError: " + fresh.path)
+	}
+}
+
 let schemes = {
 	scripts: {
 		names: ["common", "homepage", "model", "OrbitControls", "schrodinger", "testpage", "Visualization"],
@@ -109,26 +159,7 @@ let schemes = {
 		vars: defaults.scripts,
 		varsPath: "scripts",
 		on: {
-			fresh: function (fresh) {
-				const options = {
-					presets: [["minify", {
-						"mangle": false, // https://github.com/babel/minify/issues/556
-					}]],
-				}
-				if (isDev) {
-					Object.assign(options, {
-						sourceMaps: "inline",
-						sourceRoot: path.dirname(fresh.path),
-						sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
-					})
-				}
-				try {
-					fresh.content = babel.transformSync(fresh.content, options).code
-				} catch (e) {
-					if (e.code !== "BABEL_PARSE_ERROR") throw e
-					warning("SyntaxError: " + fresh.path)
-				}
-			},
+			fresh: babelize,
 		},
 	},
 	styles: {
@@ -153,13 +184,33 @@ let schemes = {
 			},
 		},
 	},
-	serviceWorker: {},
 }
 
-Object.assign(schemes.serviceWorker, schemes.scripts, {
+schemes.serviceWorker = {
 	names: ["sw"],
 	dist: wwwDir,
-})
+	src: jsSrc,
+	ext: "js",
+	vars: defaults.scripts,
+	varsPath: "scripts",
+	on: {
+		fresh: function (fresh) {
+			filenames = []
+			if (!isDev) {
+				filenames = ["/", "test", "about", "manifest.json"]
+				for (let k of [["scripts", "js/"], ["styles", "css/"], ["assets", "assets/"], ["icons", "icons/"]]) {
+					filenames = filenames.concat(
+						Object.values(defaults[k[0]])
+							.map(e => k[1] + e)
+					)
+				}
+			}
+			fresh.content = `const toCache=${JSON.stringify(filenames)}; ${fresh.content}`
+			babelize(fresh)
+		},
+	},
+	timestamps: false,
+}
 
 function doPrefix(prefix, schema) {
 	let {dist, ext, on, src, vars} = schema
@@ -169,8 +220,14 @@ function doPrefix(prefix, schema) {
 		on.old(old)
 	}
 
+	let ts
+	if (typeof schema.timestamps === "undefined") {
+		ts = timestamps
+	} else {
+		ts = schema.timestamps
+	}
 	const fresh = {}
-	fresh.filename = prefix + "_" + getTime() + "." + ext
+	fresh.filename = prefix + (ts ? "_" + getTime() : "") + "." + ext
 	fresh.path = path.join(dist, fresh.filename)
 	if (typeof src !== "undefined") {
 		fresh.content = fs.readFileSync(path.join(src, prefix + "." + ext), "utf-8")

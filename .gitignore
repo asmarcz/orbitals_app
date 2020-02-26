@@ -6,7 +6,7 @@ highlight.vue
 node_modules
 www/css/*
 !www/css/bootstrap*
-www/sw_*.js
+www/sw.js
 www/js/*
 !www/js/vue*
 !www/js/three*

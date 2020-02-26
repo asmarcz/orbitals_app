@@ -1,5 +1,5 @@
 if ("serviceWorker" in navigator) {
-	navigator.serviceWorker.register(swFilename)
+	navigator.serviceWorker.register("sw.js")
 }
 
 let maxProtonNumber = elements[elements.length - 1][0]

@@ -1,20 +1,22 @@
-console.log("bar")
-console.log(swFilename)
+// toCache gets generated here by build tool
+let cName = "orbitals.app"
+
+self.addEventListener("install", (e) => {
+	self.skipWaiting()
+	e.waitUntil(
+		caches.delete(cName)
+			.then(() => {
+				caches.open(cName)
+					.then(c => {
+						c.addAll(toCache)
+					})
+			})
+	)
+})
+
 self.addEventListener("fetch", (e) => {
 	e.respondWith(
 		caches.match(e.request)
-			.then(r => {
-				if (typeof r === "undefined") {
-					return fetch(e.request).then(res => {
-						return caches.open("orbitals.app")
-							.then(cache => {
-								cache.put(e.request, res.clone());
-								return res;
-							});
-					})
-				}
-				return r
-			})
+			.then(r => r || fetch(e.request))
 	)
-	console.log(e)
 })

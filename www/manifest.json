@@ -4,22 +4,22 @@
   "description": "Orbitals.app can be used to learn the electron configurations of elements of periodic table, see how their orbitals look in space and test your knowledge about them.",
   "icons": [
 	{
-	  "src":"icons/128x128.png",
+	  "src":"icon/128x128.png",
 	  "sizes": "128x128",
 	  "type": "image/png"
 	},
 	{
-	  "src":"icons/192x192.png",
+	  "src":"icon/192x192.png",
 	  "sizes": "192x192",
 	  "type": "image/png"
 	},
 	{
-	  "src":"icons/256x256.png",
+	  "src":"icon/256x256.png",
 	  "sizes": "256x256",
 	  "type": "image/png"
 	},
 	{
-	  "src":"icons/512x512.png",
+	  "src":"icon/512x512.png",
 	  "sizes": "512x512",
 	  "type": "image/png"
 	}

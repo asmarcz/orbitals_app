@@ -70,7 +70,7 @@ const cssDist = path.join(wwwDir, "css")
 const htmlSrc = path.join(srcDir, "templates")
 const htmlDist = wwwDir
 const assetsDist = path.join(wwwDir, "assets")
-const iconsDist = path.join(wwwDir, "icons")
+const iconDist = path.join(wwwDir, "icon")
 
 const defaults = {
 	scripts: {
@@ -83,7 +83,7 @@ const defaults = {
 }
 
 defaults.assets = fs.readdirSync(assetsDist)
-defaults.icons = fs.readdirSync(iconsDist)
+defaults.icon = fs.readdirSync(iconDist)
 
 let variableDeps = {}
 
@@ -198,7 +198,7 @@ schemes.serviceWorker = {
 			filenames = []
 			if (!isDev) {
 				filenames = ["/", "test", "about", "manifest.json"]
-				for (let k of [["scripts", "js/"], ["styles", "css/"], ["assets", "assets/"], ["icons", "icons/"]]) {
+				for (let k of [["scripts", "js/"], ["styles", "css/"], ["assets", "assets/"], ["icon", "icon/"]]) {
 					filenames = filenames.concat(
 						Object.values(defaults[k[0]])
 							.map(e => k[1] + e)

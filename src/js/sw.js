@@ -23,8 +23,39 @@ self.addEventListener("activate", () => {
 })
 
 self.addEventListener("fetch", (e) => {
-	e.respondWith(
-		caches.match(e.request)
-			.then(r => r || fetch(e.request))
-	)
+	if (e.request.url.includes(".")) {
+		e.respondWith(
+			caches.match(e.request)
+				.then(r => r || fetch(e.request))
+		)
+	} else { // is HTML
+		const controller = new AbortController()
+		const signal = controller.signal
+		let tId = setTimeout(() => controller.abort(), 3000)
+		if (navigator.onLine) {
+			e.respondWith(
+				fetch(e.request, {
+					signal,
+					headers: { "cache-control": "no-cache" },
+				})
+					.then(r => {
+						clearTimeout(tId)
+						if (r.ok) {
+							return caches.open(cName)
+								.then(cache => {
+									cache.put(e.request.url, r.clone())
+									return r
+								})
+						} else {
+							throw new Error("Response wasn't ok.")
+						}
+					})
+					.catch(() => caches.match(e.request))
+			)
+		} else {
+			e.respondWith(
+				caches.match(e.request)
+			)
+		}
+	}
 })

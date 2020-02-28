@@ -140,7 +140,6 @@ Object.assign(vueParams.methods, {
 			this.protonNumber = this.inputNumber
 			window.location.hash = '#' + this.protonNumber
 			this.showShort = this.inputShort
-			this.svgModel = undefined
 
 			this.setIonLimits()
 
@@ -222,9 +221,9 @@ Object.assign(vueParams.methods, {
 		}
 	},
 	coloring: function (index, fill) {
+		let svgModel = document.getElementById("svg-model")
 		let orbital = this.orbitalsView[index]
 		let isValence = this.valenceIndexes.includes(index)
-		let svgModel = this.getSvgModel()
 		let suffix = isValence ? "v-" : ""
 		let offset = this.orbitalsView.filter((o, i) => {
 			return o.n === orbital.n &&
@@ -235,18 +234,6 @@ Object.assign(vueParams.methods, {
 			svgModel.getElementById(orbital.n + "-" + suffix + (i + 1 + offset))
 				.setAttribute('stroke', fill)
 		}
-	},
-	getSvgModel: function () {
-		if (typeof this.svgModel === 'undefined') {
-			this.svgModel = document.getElementById('svg-object')
-				.contentDocument
-				.children[0]
-		}
-		return this.svgModel
-	},
-	changeIon: function (i) {
-		this.ion += i
-		this.svgModel = undefined
 	},
 })
 
@@ -452,6 +439,18 @@ vueParams.components = {
 						}
 					})
 
+					svgModel = svg.cloneNode(true)
+					svgModel.setAttribute('id', 'svg-model')
+					svgModel.setAttribute('class', 'mx-auto mw-100 d-block position-sticky')
+					this.$nextTick(() => {
+						let w = document.getElementById('svg-wrapper')
+						let r = document.getElementById('svg-model')
+						if (r) w.removeChild(r)
+						w.appendChild(svgModel)
+					})
+
+					svg.setAttribute('width', 1080)
+					svg.setAttribute('height', 1080)
 					let blob = new Blob([template.innerHTML], {type: 'image/svg+xml'})
 					let url = URL.createObjectURL(blob)
 					URL.revokeObjectURL(this.url)

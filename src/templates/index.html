@@ -6,7 +6,7 @@
 %> content <%
 	<!-- https://github.com/whatwg/html/issues/3510#issuecomment-370101075 -->
 	<script id="bohr-model-template" type="text/x-template">
-		<svg viewBox="0 0 200 200" width="1080" height="1080" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 			<defs>
 				<circle id="layer" cx="50%" cy="50%" stroke="orange" stroke-width="2" fill="none"/>
 				<circle id="electron" r="4" cx="50%" fill="green">
@@ -29,11 +29,8 @@
 		</svg>
 	</script>
 	<script id="bohr-model" type="text/x-template">
-		<div class="atom col-12 col-lg-5">
+		<div id="svg-wrapper" class="atom col-12 col-lg-5">
 			<img :src="url" alt="Bohr atom model" class="mx-auto mw-100 d-block position-absolute">
-			<object id="svg-object" :data="url" alt="Bohr atom model" class="mx-auto mw-100 d-block position-sticky">
-				<img :src="url" alt="Bohr atom model" class="mx-auto mw-100 d-block">
-			</object>
 		</div>
 	</script>
 	<div id="app">
@@ -67,9 +64,9 @@
 		</form>
 		<div v-if="protonNumber" v-cloak class="row mt-3">
 			<div class="col-12 text-center">
-				<button v-if="ion > minIon" @click="changeIon(-1)" class="ion-button pb-1">-</button>
+				<button v-if="ion > minIon" @click="ion--" class="ion-button pb-1">-</button>
 				{{ elements[elementIndex][1] }}<sup>{{ ion }}</sup>
-				<button v-if="ion < maxIon" @click="changeIon(1)" class="ion-button pb-1">+</button>
+				<button v-if="ion < maxIon" @click="ion++" class="ion-button pb-1">+</button>
 				: {{ elements[elementIndex][2] }}
 				<div class="overflow-auto text-nowrap">
 					<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>

@@ -10,7 +10,7 @@ let timestamps = false
 let samebuild = false
 let overwrite = false
 
-for (let opt of process.argv) {
+for (let opt of process.argv.slice(2)) {
 	switch (opt) {
 		case "--dev":
 			isDev = true
@@ -27,6 +27,8 @@ for (let opt of process.argv) {
 		case "--overwrite":
 			overwrite = true
 			break
+		default:
+			warning("Invalid option " + opt)
 	}
 }
 

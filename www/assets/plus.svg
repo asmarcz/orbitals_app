@@ -2,13 +2,13 @@
 	<circle fill="#707070" cx="250" cy="250" r="250"/>
 	<defs>
 		<g id="leg" fill="#252525">
-			<circle cx="0" cy="0" r="49.5"/>
-			<circle cx="239" cy="0" r="49.5"/>
-			<rect x="0" y="-49.5" height="99" width="239"/>
+			<circle r="50"/>
+			<rect x="-50" height="240" width="100"/>
+			<circle cy="240" r="50"/>
 		</g>
 	</defs>
-	<g transform="translate(130, 260)">
-		<use transform="translate(218.5, -119.5) rotate(90, -49.5, -49.5)" xlink:href="#leg" href="#leg"/>
+	<g transform="translate(250, 130)">
 		<use xlink:href="#leg" href="#leg"/>
+		<use transform="rotate(90, 0, 120)" xlink:href="#leg" href="#leg"/>
 	</g>
 </svg>

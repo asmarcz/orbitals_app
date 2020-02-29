@@ -110,57 +110,29 @@ function ionLimits(protonNumber, orbitals, shortIndexes) {
 }
 
 class Controller {
-	constructor(element, quantumLayer, exceptions) {
-		/** @type QuantumLayer[] */
-		this.layerCollection = [quantumLayer];
+	constructor(element, exceptions) {
 		this.element = element;
-		this.maxN = quantumLayer.n;
 		this.exceptions = exceptions;
 		this._isException = false
 		this.checked = false
 	}
 
-	createQuantumLayer() {
-		this.maxN++;
-		this.layerCollection.push(new QuantumLayer(this.maxN));
-	}
-
-	hasMore() {
-		let lastOrbital = this.element.orbitals[this.element.orbitals.length - 1];
-		let toSubtract = this.element.countNumber - this.element.electronNumber;
-		lastOrbital.electronNumber -= toSubtract;
-		this.element.countNumber -= toSubtract;
-	}
-
 	initiate() {
-		this.createQuantumLayer();
-		while (this.element.electronNumber !== this.element.countNumber) {
-			if (this.element.electronNumber < this.element.countNumber) {
-				this.hasMore();
-			} else {
-				let newestLayer, secondNewestLayer;
-				let secondMaxN = this.maxN - 1;
-				for (let i = 0; i < this.layerCollection.length; i++) {
-					if (this.layerCollection[i].n === secondMaxN) {
-						secondNewestLayer = this.layerCollection[i];
-						newestLayer = this.layerCollection[i + 1];
-						break;
-					}
-				}
-				if (newestLayer.lState === 0 && secondNewestLayer.lState !== 0) {
-					this.createQuantumLayer();
-				}
-
-				this.layerCollection.sort(aufbauOrder);
-
-				for (let layer of this.layerCollection) {
-					if (layer.canBeUsed()) {
-						this.element.addOrbital(layer.lState, layer.n);
-						layer.lState++;
-						break;
-					}
-				}
+		let n = 1
+		let isOdd = true
+		let e = this.element.electronNumber
+		while (e !== 0) {
+			let add = isOdd ? 1 : 2
+			let a = (n + add) / 2
+			for (let k = a, l = a - add; l >= 0 && e !== 0; k++, l--) {
+				let sub = Math.min(maxOrbitalElectronNumber(l), e)
+				e -= sub
+				this.element.orbitals.push(
+					new Orbital(l, k, sub)
+				)
 			}
+			isOdd = !isOdd
+			n++
 		}
 	}
 
@@ -228,29 +200,7 @@ class Element {
 	constructor(protonNumber, electronNumber = protonNumber) {
 		this.protonNumber = protonNumber;
 		this.electronNumber = electronNumber;
-		this.countNumber = 0;
 		/** @type Orbital[] */
 		this.orbitals = [];
-	}
-
-	addOrbital(type, n) {
-		let orbital = new Orbital(type, n);
-		this.orbitals.push(orbital);
-		this.countNumber += orbital.electronNumber;
-	}
-}
-
-class QuantumLayer {
-	constructor(n) {
-		this.n = n;
-		this.lState = 0;
-	}
-
-	canBeUsed() {
-		return this.n > this.lState;
-	}
-
-	get sum() {
-		return this.n + this.lState;
 	}
 }

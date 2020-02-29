@@ -77,8 +77,7 @@ let vueParams = {
 	methods: {
 		getController: function () {
 			let element = new Element(this.protonNumber - Math.min(0, this.ion))
-			let mainQuantum = new QuantumLayer(1)
-			let controller = new Controller(element, mainQuantum, exceptions)
+			let controller = new Controller(element, exceptions)
 			controller.initiate()
 			return controller
 		},

@@ -105,13 +105,17 @@
 }
 
 @media screen and (min-width: 992px) {
-	.atom svg, .atom img {
+	.atom svg {
 		max-height: 45vh;
+	}
+	.atom img {
+		height: 100%;
+		max-height: none;
 	}
 }
 
 @media screen and (min-width: 1200px) {
-	.atom svg, .atom img {
+	.atom svg {
 		max-height: none;
 	}
 }

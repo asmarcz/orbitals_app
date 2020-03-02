@@ -68,7 +68,7 @@
 				{{ elements[elementIndex][1] }}<sup>{{ ion }}</sup>
 				<button v-if="ion < maxIon" @click="ion++" class="ion-button pb-1">+</button>
 				: {{ elements[elementIndex][2] }}
-				<div class="overflow-auto text-nowrap">
+				<div id="configuration-text" class="overflow-auto text-nowrap">
 					<span v-if="showShort && nobleGasNumber > 0">[{{ elements[nobleGasIndex][1] }}] + </span>
 					<span v-html="configurationText"></span>
 				</div>

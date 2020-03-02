@@ -65,6 +65,7 @@ function scrollToContent() {
 }
 
 let keysFlag = false
+let isEdge = /Edge/.test(navigator.userAgent)
 
 vueParams.data = function () {
 	return Object.assign(data, {
@@ -145,6 +146,27 @@ Object.assign(vueParams.methods, {
 
 			hideKeyboard()
 			scrollToContent()
+
+			if (isEdge) {
+				this.$nextTick(function() {
+					let observer = new IntersectionObserver(function (entries) {
+						let which = Math.round(entries[0].intersectionRatio) === 0
+						let cl = document.getElementById('svg-model')
+							.classList
+						if (which) {
+							cl.add('position-fixed')
+						} else {
+							cl.remove('position-fixed')
+						}
+					}, {
+						root: null,
+						threshold: [0, 1],
+					})
+					observer.observe(
+						document.getElementById('configuration-text')
+					)
+				})
+			}
 		}
 	},
 	toggleOpen: function (index, ev) {
@@ -441,7 +463,7 @@ vueParams.components = {
 
 					svgModel = svg.cloneNode(true)
 					svgModel.setAttribute('id', 'svg-model')
-					svgModel.setAttribute('class', 'mx-auto mw-100 d-block position-sticky')
+					svgModel.setAttribute('class', 'mx-auto mw-100 d-block' + (isEdge ? '' : ' position-sticky'))
 					this.$nextTick(() => {
 						let w = document.getElementById('svg-wrapper')
 						let r = document.getElementById('svg-model')

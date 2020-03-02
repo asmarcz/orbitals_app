@@ -92,7 +92,7 @@
 					</thead>
 					<tbody>
 					<template v-for="(orbital, index) in orbitalsView">
-						<tr @mouseleave="coloring(index, '')" @mouseenter="coloring(index, 'white')" @click="toggleOpen(index, $event)" :class="{'valence': valenceIndexes.includes(index), 'd-none': !displayOrbitalsIndexes.includes(index)}">
+						<tr @mouseleave="coloring(index, 'none')" @mouseenter="coloring(index, 'white')" @click="toggleOpen(index, $event)" :class="{'valence': valenceIndexes.includes(index), 'd-none': !displayOrbitalsIndexes.includes(index)}">
 							<td>{{ orbital.n }}</td>
 							<td>{{ getOrbitalTypeText(orbital.type) }}</td>
 							<td>{{ orbital.electronNumber }}</td>

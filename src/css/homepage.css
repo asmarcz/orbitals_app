@@ -118,6 +118,9 @@
 	.atom svg {
 		max-height: none;
 	}
+	.atom svg.position-fixed {
+		max-height: 50vh;
+	}
 }
 
 @keyframes electron {

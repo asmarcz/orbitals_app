@@ -66,6 +66,7 @@ function scrollToContent() {
 
 let keysFlag = false
 let isEdge = /Edge/.test(navigator.userAgent)
+let observer
 
 vueParams.data = function () {
 	return Object.assign(data, {
@@ -149,14 +150,31 @@ Object.assign(vueParams.methods, {
 
 			if (isEdge) {
 				this.$nextTick(function() {
-					let observer = new IntersectionObserver(function (entries) {
-						let which = Math.round(entries[0].intersectionRatio) === 0
-						let cl = document.getElementById('svg-model')
-							.classList
-						if (which) {
-							cl.add('position-fixed')
+					function checkWidth() {
+						if (window.innerWidth < 992) {
+							perform = false
+							document.getElementById('svg-model')
+								.classList
+								.remove('position-fixed')
 						} else {
-							cl.remove('position-fixed')
+							perform = true
+						}
+					}
+
+					let perform = true
+					checkWidth()
+					window.addEventListener('resize', checkWidth)
+					if (typeof observer !== 'undefined') observer.disconnect()
+					observer = new IntersectionObserver(function (entries) {
+						if (perform) {
+							let which = Math.round(entries[0].intersectionRatio) === 0
+							let cl = document.getElementById('svg-model')
+								.classList
+							if (which) {
+								cl.add('position-fixed')
+							} else {
+								cl.remove('position-fixed')
+							}
 						}
 					}, {
 						root: null,

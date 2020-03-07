@@ -49,7 +49,7 @@ function getTime() {
 	function generate() {
 		let d = new Date()
 		let time = ""
-		for (let part of [d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]) {
+		for (let part of [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()]) {
 			time += part.toString().padStart(2, "0")
 		}
 		return time

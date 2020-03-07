@@ -11,3 +11,4 @@ www/js/*
 !www/js/vue*
 !www/js/three*
 www/*.html
+tmp

@@ -113,6 +113,8 @@ let vueParams = {
 		setIonLimits: function () {
 			[this.minIon, this.maxIon] = ionLimits(this.protonNumber, this.orbitalsView, this.shortOrbitalsIndexesView)
 		},
+		getOrbitalTypeText,
+		getOrientations,
 	},
 }
 

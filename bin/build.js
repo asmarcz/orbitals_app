@@ -1,7 +1,7 @@
 const crypto = require("crypto")
 const fs = require("fs")
 const path = require("path")
-const babel = require("@babel/core")
+const terser = require("terser")
 const watch = require("node-watch")
 
 let isDev = false
@@ -65,6 +65,7 @@ function getTime() {
 
 const srcDir = path.join(__dirname, "..", "src")
 const wwwDir =  path.join(__dirname, "..", "www")
+const tmpDir = path.join(__dirname, "..", "tmp")
 const jsSrc = path.join(srcDir, "js")
 const jsDist = path.join(wwwDir, "js")
 const cssSrc = path.join(srcDir, "css")
@@ -73,6 +74,10 @@ const htmlSrc = path.join(srcDir, "templates")
 const htmlDist = wwwDir
 const assetsDist = path.join(wwwDir, "assets")
 const iconDist = path.join(wwwDir, "icon")
+
+if (!fs.existsSync(tmpDir)) {
+	fs.mkdirSync(tmpDir)
+}
 
 const defaults = {
 	scripts: {
@@ -131,37 +136,51 @@ function diffIt(fresh, old) {
 	return false
 }
 
-function babelize(fresh) {
+const terserCacheFile = path.join(tmpDir, "terser_cache.json")
+const nameCache = fs.existsSync(terserCacheFile) ? JSON.parse(fs.readFileSync(terserCacheFile, "utf-8")) : {}
+
+function saveTerserCache() {
+	fs.writeFileSync(terserCacheFile, JSON.stringify(nameCache))
+}
+
+function terserize(fresh) {
 	const options = {
-		presets: [["minify", {
-			"mangle": false, // https://github.com/babel/minify/issues/556
-		}]],
+		mangle: {
+			toplevel: true,
+		},
+		nameCache,
 	}
+
 	if (isDev) {
 		Object.assign(options, {
-			sourceMaps: "inline",
-			sourceRoot: path.dirname(fresh.path),
-			sourceFileName: getPrefix(fresh.filename) + path.extname(fresh.filename),
+			url: "inline",
+			root: path.dirname(fresh.path),
+			filename: getPrefix(fresh.filename) + path.extname(fresh.filename),
 		})
 	}
-	try {
-		fresh.content = babel.transformSync(fresh.content, options).code
-	} catch (e) {
-		if (e.code !== "BABEL_PARSE_ERROR") throw e
+
+	let result = terser.minify({
+		[fresh.path]: fresh.content,
+	}, options)
+
+	if (result.error) {
+		if (result.error.name !== "SyntaxError") throw result.error
 		warning("SyntaxError: " + fresh.path)
+	} else {
+		fresh.content = result.code
 	}
 }
 
 let schemes = {
 	scripts: {
-		names: ["common", "homepage", "model", "OrbitControls", "schrodinger", "testpage", "Visualization"],
+		names: ["model", "OrbitControls", "schrodinger", "Visualization", "common", "homepage", "testpage",],
 		dist: jsDist,
 		src: jsSrc,
 		ext: "js",
 		vars: defaults.scripts,
 		varsPath: "scripts",
 		on: {
-			fresh: babelize,
+			fresh: terserize,
 		},
 	},
 	styles: {
@@ -208,7 +227,7 @@ schemes.serviceWorker = {
 				}
 			}
 			fresh.content = `const toCache=${JSON.stringify(filenames)}; ${fresh.content}`
-			babelize(fresh)
+			terserize(fresh)
 		},
 	},
 	timestamps: false,
@@ -373,4 +392,11 @@ if (isDev) {
 				break
 		}
 	})
+
+	process.on("SIGINT", function () {
+		saveTerserCache()
+		process.exit()
+	})
+} else {
+	saveTerserCache()
 }

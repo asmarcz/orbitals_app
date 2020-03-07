@@ -153,14 +153,17 @@ function terserize(fresh) {
 
 	if (isDev) {
 		Object.assign(options, {
-			url: "inline",
-			root: path.dirname(fresh.path),
-			filename: getPrefix(fresh.filename) + path.extname(fresh.filename),
+			sourceMap: {
+				url: "inline",
+				root: path.dirname(fresh.path),
+				filename: fresh.filename,
+				includeSources: true,
+			},
 		})
 	}
 
 	let result = terser.minify({
-		[fresh.path]: fresh.content,
+		[getPrefix(fresh.filename) + path.extname(fresh.filename)]: fresh.content,
 	}, options)
 
 	if (result.error) {
